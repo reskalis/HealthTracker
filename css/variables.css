@@ -1,6 +1,15 @@
 :root {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
   color-scheme: dark;
-  --bg:#090b0f; --panel:#151922; --panel-2:#202631; --text:#f5f7fb;
-  --muted:#9299a6; --line:#252b36; --success:#71d6a4;
+
+  --bg: #090b0f;
+  --panel: #151922;
+  --panel-2: #202631;
+  --panel-3: #11151c;
+  --text: #f5f7fb;
+  --muted: #9299a6;
+  --line: #252b36;
+  --line-strong: #303846;
+  --success: #71d6a4;
+  --warning: #f0c36a;
 }
