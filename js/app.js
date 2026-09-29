@@ -49,6 +49,8 @@ function refreshSystemStatus() {
 }
 
 function renderCurrentHistory() {
+  $("#historyCount").textContent = entries.length + (entries.length === 1 ? " record" : " records");
+
   renderHistory($("#history"), entries, FORM_CONFIG, {
     filter: historyFilter,
     onEdit: id => {
