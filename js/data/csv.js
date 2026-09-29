@@ -1,5 +1,5 @@
 export const CSV_COLUMNS = [
-  "datetime", "type", "sleep_hours", "sleep_quality", "energy",
+  "id", "datetime", "type", "sleep_hours", "sleep_quality", "energy",
   "weight_lb", "waist_in", "systolic", "diastolic", "pulse",
   "workout_type", "duration_min", "intensity", "notes"
 ];
@@ -43,7 +43,7 @@ export function csvToEntries(text) {
   return rows.filter(row => row.some(Boolean)).map(row => {
     const entry = {};
     headers.forEach((header, index) => { if (row[index] !== undefined && row[index] !== "") entry[header] = row[index]; });
-    entry.id = crypto.randomUUID();
+    entry.id ||= crypto.randomUUID();
     return entry;
   });
 }
