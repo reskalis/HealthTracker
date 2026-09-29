@@ -1,4 +1,4 @@
-import { summarize, buildTrendSeries } from "../analytics/summary.js";
+import { summarize, buildTrendSeries, rangeBounds } from "../analytics/summary.js";
 
 function formatNumber(value, digits = 1) {
   if (value === null || value === undefined) return "—";
@@ -19,21 +19,6 @@ function summaryCard(label, value, detail) {
       <small>${detail}</small>
     </article>
   `;
-}
-
-function timeBounds(series) {
-  const times = series.flatMap(item =>
-    item.points
-      .map(point => new Date(point.date).getTime())
-      .filter(Number.isFinite)
-  );
-
-  if (!times.length) return null;
-
-  return {
-    min: Math.min(...times),
-    max: Math.max(...times)
-  };
 }
 
 function pointPath(points, width, height, padding, minValue, maxValue, minTime, maxTime) {
@@ -88,9 +73,9 @@ function lineChart(title, series, days, suffix = "") {
     maxValue += margin;
   }
 
-  const bounds = timeBounds(usable);
-  const minTime = bounds?.min ?? Date.now();
-  const maxTime = bounds?.max ?? minTime + 1;
+  const { start, end } = rangeBounds(days);
+  const minTime = start.getTime();
+  const maxTime = end.getTime() - 1;
 
   const width = 320;
   const height = 150;
