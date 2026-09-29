@@ -50,7 +50,7 @@
       <p class="build-note">Build <span id="buildId">—</span></p>
     </details>
 
-    <section class="grid">
+    <section class="grid" aria-label="Quick log">
       <button class="card" data-form="daily">
         <b>☀️ Daily check-in</b>
         <span>Sleep, quality & energy</span>
@@ -69,9 +69,41 @@
       </button>
     </section>
 
-    <section>
-      <div class="section-title"><h3>Recent</h3></div>
-      <div id="recent" class="list"></div>
+    <section class="dashboard-section">
+      <div class="section-heading">
+        <div>
+          <h3>Trends</h3>
+          <p>Descriptive summaries from your local records.</p>
+        </div>
+        <div class="range-picker" aria-label="Trend range">
+          <button type="button" data-range="7">7D</button>
+          <button type="button" data-range="30" class="active">30D</button>
+          <button type="button" data-range="90">90D</button>
+        </div>
+      </div>
+
+      <div id="summaryCards" class="summary-grid"></div>
+      <div id="charts" class="charts"></div>
+    </section>
+
+    <section class="history-section">
+      <div class="section-heading">
+        <div>
+          <h3>History</h3>
+          <p>Edit or remove individual records.</p>
+        </div>
+        <label class="filter-control">
+          <span class="sr-only">Filter history</span>
+          <select id="historyFilter">
+            <option value="all">All</option>
+            <option value="daily">Daily</option>
+            <option value="measurement">Weight</option>
+            <option value="bp">Blood pressure</option>
+            <option value="workout">Workouts</option>
+          </select>
+        </label>
+      </div>
+      <div id="history" class="history-list"></div>
     </section>
   </main>
 
@@ -83,7 +115,7 @@
           <button type="button" id="close" aria-label="Close">×</button>
         </div>
         <div id="fields"></div>
-        <button class="save-button" type="submit">Save entry</button>
+        <button id="saveEntry" class="save-button" type="submit">Save entry</button>
       </div>
     </form>
   </dialog>
