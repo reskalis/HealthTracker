@@ -6,7 +6,7 @@
  * - DB_SCHEMA_VERSION changes only when IndexedDB structure changes.
  * - BACKUP_SCHEMA_VERSION changes only when the portable CSV format changes.
  */
-export const APP_VERSION = "0.4.2";
-export const BUILD_ID = "2026-09-29.5";
+export const APP_VERSION = "0.4.3";
+export const BUILD_ID = "2026-09-29.6";
 export const DB_SCHEMA_VERSION = 1;
 export const BACKUP_SCHEMA_VERSION = 2;
