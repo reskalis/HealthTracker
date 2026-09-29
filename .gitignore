@@ -1,6 +1,8 @@
-# Never commit personal health exports or local data.
-*.csv
-*.json
-data/
+# Personal health exports must never be committed to this public repository.
+healthtracker_backup*.csv
+healthtracker_*.csv
 backups/
+data/
+
+# Local OS/editor artifacts.
 .DS_Store
