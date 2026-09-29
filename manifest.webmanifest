@@ -1,1 +1,11 @@
-{"name":"HealthTracker","short_name":"Health","start_url":"./","display":"standalone","background_color":"#090b0f","theme_color":"#090b0f","description":"Private, local-first personal health tracker."}
+{
+  "id": "./",
+  "name": "HealthTracker",
+  "short_name": "Health",
+  "description": "Private, local-first personal health tracker.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090b0f",
+  "theme_color": "#090b0f"
+}
