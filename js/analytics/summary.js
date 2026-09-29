@@ -9,18 +9,28 @@ function average(values) {
   return valid.reduce((sum, value) => sum + value, 0) / valid.length;
 }
 
-function cutoffForDays(days) {
-  const cutoff = new Date();
-  cutoff.setHours(0, 0, 0, 0);
-  cutoff.setDate(cutoff.getDate() - (days - 1));
-  return cutoff;
+/**
+ * Returns an inclusive local-day window ending today.
+ * The end is tomorrow at local midnight so future-dated records are excluded.
+ */
+export function rangeBounds(days) {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - (days - 1));
+
+  const end = new Date();
+  end.setHours(0, 0, 0, 0);
+  end.setDate(end.getDate() + 1);
+
+  return { start, end };
 }
 
 export function entriesInRange(entries, days) {
-  const cutoff = cutoffForDays(days);
+  const { start, end } = rangeBounds(days);
+
   return entries.filter(entry => {
     const date = new Date(entry.datetime);
-    return !Number.isNaN(date.getTime()) && date >= cutoff;
+    return !Number.isNaN(date.getTime()) && date >= start && date < end;
   });
 }
 
