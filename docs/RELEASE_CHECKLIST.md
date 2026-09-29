@@ -13,13 +13,16 @@ Use this checklist before treating a deployment as ready for real health data.
 1. Open HealthTracker online.
 2. Confirm **Data & app status** shows the expected app, database, and backup versions.
 3. Create one dummy record of each type.
-4. Confirm each record appears under **Recent**.
-5. Export `healthtracker_backup.csv`.
-6. Confirm the file contains all records and the expected backup schema version.
-7. Restore that backup and verify the record count matches.
-8. Reload the app and confirm records remain.
-9. Put the device offline, reopen HealthTracker, and confirm the app loads and records remain available.
-10. Return online and verify the network status updates.
+4. Confirm each record appears under **History** and the type filters work.
+5. Edit one dummy record and confirm the change persists after reload.
+6. Delete one dummy record and confirm only that record is removed.
+7. Check the 7D, 30D, and 90D dashboard ranges.
+8. Export `healthtracker_backup.csv`.
+9. Confirm the file contains all records and the expected backup schema version.
+10. Restore that backup and verify the record count matches.
+11. Reload the app and confirm records remain.
+12. Put the device offline, reopen HealthTracker, and confirm the app loads and records remain available.
+13. Return online and verify the network status updates.
 
 ## Update test
 1. Deploy a build with a new build ID and service-worker cache release ID.
