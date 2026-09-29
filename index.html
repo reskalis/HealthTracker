@@ -87,25 +87,32 @@
       <div id="charts" class="charts"></div>
     </section>
 
-    <section class="history-section">
-      <div class="section-heading">
+    <details class="history-section history-panel">
+      <summary class="history-summary">
         <div>
           <h3>History</h3>
-          <p>Edit or remove individual records.</p>
+          <span id="historyCount">0 records</span>
         </div>
-        <label class="filter-control">
-          <span class="sr-only">Filter history</span>
-          <select id="historyFilter">
-            <option value="all">All</option>
-            <option value="daily">Daily</option>
-            <option value="measurement">Weight</option>
-            <option value="bp">Blood pressure</option>
-            <option value="workout">Workouts</option>
-          </select>
-        </label>
+        <span class="history-chevron" aria-hidden="true">⌄</span>
+      </summary>
+
+      <div class="history-body">
+        <div class="history-toolbar">
+          <p>Edit or remove individual records.</p>
+          <label class="filter-control">
+            <span class="sr-only">Filter history</span>
+            <select id="historyFilter">
+              <option value="all">All</option>
+              <option value="daily">Daily</option>
+              <option value="measurement">Weight</option>
+              <option value="bp">Blood pressure</option>
+              <option value="workout">Workouts</option>
+            </select>
+          </label>
+        </div>
+        <div id="history" class="history-list"></div>
       </div>
-      <div id="history" class="history-list"></div>
-    </section>
+    </details>
   </main>
 
   <dialog id="modal">
