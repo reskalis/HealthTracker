@@ -1,4 +1,4 @@
-const CACHE_VERSION = "0.3.0-20260929.2";
+const CACHE_VERSION = "0.4.0-20260929.3";
 const SHELL_CACHE = "healthtracker-shell-" + CACHE_VERSION;
 const RUNTIME_CACHE = "healthtracker-runtime-" + CACHE_VERSION;
 
@@ -13,12 +13,14 @@ const APP_SHELL = [
   "./js/app.js",
   "./js/config/forms.js",
   "./js/config/version.js",
+  "./js/analytics/summary.js",
   "./js/db/database.js",
   "./js/data/export.js",
   "./js/data/csv.js",
   "./js/pwa/update.js",
   "./js/ui/forms.js",
   "./js/ui/history.js",
+  "./js/ui/dashboard.js",
   "./js/ui/status.js",
   "./js/ui/toast.js"
 ];
