@@ -1,0 +1,6 @@
+# Never commit personal health exports or local data.
+*.csv
+*.json
+data/
+backups/
+.DS_Store
