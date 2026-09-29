@@ -1,7 +1,43 @@
-* { box-sizing:border-box; }
-body { margin:0; background:var(--bg); color:var(--text); min-height:100vh; }
-button, input, select { font:inherit; }
-button { color:inherit; }
-header, main { max-width:680px; margin:auto; }
-h1 { font-size:22px; margin:2px 0; }
-small { font-size:10px; letter-spacing:1.4px; color:var(--success); }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+header,
+main {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 2px 0;
+  font-size: 22px;
+}
+
+small {
+  color: var(--success);
+  font-size: 10px;
+  letter-spacing: 1.4px;
+}
