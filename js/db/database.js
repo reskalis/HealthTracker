@@ -1,5 +1,7 @@
+import { DB_SCHEMA_VERSION } from "../config/version.js";
+
 const DB_NAME = "HealthTracker";
-const DB_VERSION = 1;
+const DB_VERSION = DB_SCHEMA_VERSION;
 const STORE = "entries";
 const LEGACY_KEY = "healthtracker.v1";
 
