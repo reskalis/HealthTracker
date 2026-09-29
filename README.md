@@ -14,10 +14,11 @@ Health records are stored on the user's device in IndexedDB. There is no account
 - `css/` — design tokens, base styles, and components
 - `js/config/forms.js` — declarative field definitions and validation
 - `js/config/version.js` — app/database/backup version metadata
+- `js/analytics/summary.js` — local descriptive trend calculations
 - `js/db/database.js` — IndexedDB persistence and migrations
 - `js/data/` — portable CSV serialization and export
 - `js/pwa/update.js` — service-worker registration and update UX
-- `js/ui/` — presentation modules
+- `js/ui/` — forms, dashboard, history, status, and presentation modules
 - `js/app.js` — application orchestration
 - `docs/DATA_SCHEMA.md` — canonical data and backup schema
 - `sw.js` — offline cache and update strategy
@@ -39,6 +40,12 @@ HealthTracker keeps three versions separate:
 - Backup schema version — portable CSV format
 
 The current values are defined in `js/config/version.js` and surfaced in the app under **Data & app status**.
+
+## Dashboard and history
+
+Trend summaries are calculated entirely on-device from IndexedDB records. HealthTracker currently supports 7-, 30-, and 90-day descriptive views for weight, blood pressure, workouts, sleep, and energy. No analytics data is transmitted anywhere.
+
+History is filterable by record type. Existing records can be edited or deleted individually. Editing preserves the record UUID and original creation timestamp while updating the health fields, event date/time, and `updated_at` timestamp.
 
 ## PWA update strategy
 
