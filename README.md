@@ -41,11 +41,17 @@ HealthTracker keeps three versions separate:
 
 The current values are defined in `js/config/version.js` and surfaced in the app under **Data & app status**.
 
-## Dashboard and history
+## Trends and history
 
-Trend summaries are calculated entirely on-device from IndexedDB records. HealthTracker currently supports 7-, 30-, and 90-day descriptive views for weight, blood pressure, workouts, sleep, and energy. No analytics data is transmitted anywhere.
+Trend summaries are calculated entirely on-device from IndexedDB records. HealthTracker supports 1-, 7-, 30-, and 90-day descriptive views. Each metric is presented as one readable card so the headline number, context, and chart stay together.
 
-History is filterable by record type. Existing records can be edited or deleted individually. Editing preserves the record UUID and original creation timestamp while updating the health fields, event date/time, and `updated_at` timestamp.
+- Weight includes latest weight, change in range, and waist context.
+- Blood pressure includes the range average, latest reading, pulse context, and systolic/diastolic chart.
+- Sleep includes average sleep, sleep-quality/energy context, and a time-scaled trend.
+- Activity stays intentionally compact with workout count and total minutes rather than forcing event data into a line graph.
+- Chart points can be tapped to inspect the specific value and timestamp.
+
+History is collapsed by default, filterable by record type, grouped by date, and rendered as compact expandable rows. Edit/Delete controls and secondary details only appear after expanding an entry. The first 50 matching records render initially, with older records available on demand. Editing preserves the record UUID and original creation timestamp while updating the health fields, event date/time, and `updated_at` timestamp.
 
 ## PWA update strategy
 
