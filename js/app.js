@@ -1,5 +1,5 @@
 import { FORM_CONFIG } from "./config/forms.js";
-import { getEntries, putEntry, clearEntries, migrateLegacyLocalStorage } from "./db/database.js";
+import { getEntries, putEntry, migrateLegacyLocalStorage } from "./db/database.js";
 import { exportBackup } from "./data/export.js";
 import { csvToEntries } from "./data/csv.js";
 import { renderFields } from "./ui/forms.js";
@@ -77,14 +77,8 @@ async function initialize() {
       showToast("Backup exported");
     }
   });
-  $("#import").addEventListener("click", () => $("#importFile").click());
-  $("#importFile").addEventListener("change", handleImport);
-  $("#clear").addEventListener("click", async () => {
-    if (entries.length && confirm("Delete all locally stored HealthTracker entries? Export a backup first if you need one.")) {
-      await clearEntries();
-      await refresh();
-    }
-  });
+  $("#restore").addEventListener("click", () => $("#restoreInput").click());
+  $("#restoreInput").addEventListener("change", handleImport);
 }
 
 $("#today").textContent = new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
