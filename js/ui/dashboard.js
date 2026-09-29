@@ -5,60 +5,29 @@ function formatNumber(value, digits = 1) {
   return Number(value).toFixed(digits).replace(/\.0$/, "");
 }
 
-function signed(value, unit = "") {
-  if (value === null || value === undefined) return "Not enough data";
+function formatChange(value, unit) {
+  if (value === null || value === undefined) return null;
   const prefix = value > 0 ? "+" : "";
   return `${prefix}${formatNumber(value)}${unit}`;
 }
 
-function summaryCard(label, value, detail) {
-  return `
-    <article class="summary-card">
-      <span>${label}</span>
-      <strong>${value}</strong>
-      <small>${detail}</small>
-    </article>
-  `;
-}
-
-function pointPath(points, width, height, padding, minValue, maxValue, minTime, maxTime) {
-  if (!points.length) return "";
-
-  const valueSpan = maxValue - minValue || 1;
-  const timeSpan = maxTime - minTime || 1;
-
-  return points.map((point, index) => {
-    const time = new Date(point.date).getTime();
-    const x = points.length === 1
-      ? width / 2
-      : padding + ((time - minTime) / timeSpan) * (width - padding * 2);
-
-    const y = height - padding -
-      ((point.value - minValue) / valueSpan) * (height - padding * 2);
-
-    return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
-  }).join(" ");
-}
-
-function axisLabel(timestamp, days) {
-  const date = new Date(timestamp);
-
+function formatPointDate(isoString, days) {
+  const date = new Date(isoString);
   return days === 1
     ? date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
     : date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-function lineChart(title, series, days, suffix = "") {
-  const usable = series.filter(item => item.points.length);
+function axisDate(timestamp, days) {
+  const date = new Date(timestamp);
+  return days === 1
+    ? date.toLocaleTimeString(undefined, { hour: "numeric" })
+    : date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
 
-  if (!usable.length) {
-    return `
-      <article class="chart-card">
-        <div class="chart-header"><strong>${title}</strong><span>No data in this range</span></div>
-        <div class="chart-empty">Log a few entries to see a trend.</div>
-      </article>
-    `;
-  }
+function chartGeometry(series, days) {
+  const usable = series.filter(item => item.points.length);
+  if (!usable.length) return null;
 
   const allValues = usable.flatMap(item => item.points.map(point => point.value));
   let minValue = Math.min(...allValues);
@@ -74,84 +43,240 @@ function lineChart(title, series, days, suffix = "") {
   }
 
   const { start, end } = rangeBounds(days);
-  const minTime = start.getTime();
-  const maxTime = end.getTime() - 1;
+
+  return {
+    usable,
+    minValue,
+    maxValue,
+    minTime: start.getTime(),
+    maxTime: end.getTime() - 1
+  };
+}
+
+function pointPosition(point, geometry) {
+  const width = 320;
+  const height = 148;
+  const left = 40;
+  const right = 12;
+  const top = 16;
+  const bottom = 24;
+
+  const time = new Date(point.date).getTime();
+  const timeSpan = geometry.maxTime - geometry.minTime || 1;
+  const valueSpan = geometry.maxValue - geometry.minValue || 1;
+
+  const x = left + ((time - geometry.minTime) / timeSpan) * (width - left - right);
+  const y = height - bottom -
+    ((point.value - geometry.minValue) / valueSpan) * (height - top - bottom);
+
+  return { x, y };
+}
+
+function chartMarkup(title, series, days, suffix = "") {
+  const geometry = chartGeometry(series, days);
+
+  if (!geometry) {
+    return `
+      <div class="metric-chart-empty">
+        No readings in this range
+      </div>
+    `;
+  }
 
   const width = 320;
-  const height = 150;
-  const padding = 18;
+  const height = 148;
+  const left = 40;
+  const right = 12;
+  const top = 16;
+  const bottom = 24;
 
-  const paths = usable.map((item, index) => {
-    const path = `
-      <path class="chart-line chart-line-${index + 1}"
-        d="${pointPath(item.points, width, height, padding, minValue, maxValue, minTime, maxTime)}"
-        vector-effect="non-scaling-stroke" />
+  const seriesMarkup = geometry.usable.map((item, seriesIndex) => {
+    const positions = item.points.map(point => ({
+      point,
+      ...pointPosition(point, geometry)
+    }));
+
+    const path = positions.map((position, index) =>
+      `${index === 0 ? "M" : "L"} ${position.x.toFixed(1)} ${position.y.toFixed(1)}`
+    ).join(" ");
+
+    const points = positions.map(position => {
+      const displayValue = `${item.label} ${formatNumber(position.point.value)}${suffix}`;
+      const displayDate = formatPointDate(position.point.date, days);
+
+      return `
+        <circle
+          class="chart-point chart-point-${seriesIndex + 1}"
+          cx="${position.x.toFixed(1)}"
+          cy="${position.y.toFixed(1)}"
+          r="4"
+          tabindex="0"
+          role="button"
+          aria-label="${displayValue}, ${displayDate}"
+          data-inspect-value="${displayValue}"
+          data-inspect-date="${displayDate}"
+        ></circle>
+      `;
+    }).join("");
+
+    return `
+      <path
+        class="chart-line chart-line-${seriesIndex + 1}"
+        d="${path}"
+        vector-effect="non-scaling-stroke"
+      ></path>
+      ${points}
     `;
-
-    const singlePoint = item.points.length === 1
-      ? `<circle class="chart-dot chart-dot-${index + 1}" cx="${width / 2}" cy="${height / 2}" r="4"></circle>`
-      : "";
-
-    return path + singlePoint;
   }).join("");
 
-  const latest = usable.map(item => {
+  const latestText = geometry.usable.map(item => {
     const point = item.points.at(-1);
     return `${item.label} ${formatNumber(point.value)}${suffix}`;
   }).join(" • ");
 
-  const startLabel = axisLabel(minTime, days);
-  const endLabel = axisLabel(maxTime, days);
-
   return `
-    <article class="chart-card">
-      <div class="chart-header"><strong>${title}</strong><span>${latest}</span></div>
-      <svg class="trend-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${title} trend">
-        <line class="chart-gridline" x1="18" y1="132" x2="302" y2="132"></line>
-        <line class="chart-gridline" x1="18" y1="18" x2="302" y2="18"></line>
-        ${paths}
+    <div class="metric-chart">
+      <div class="chart-readout" aria-live="polite">${latestText}</div>
+      <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${title} trend">
+        <line class="chart-gridline" x1="${left}" y1="${top}" x2="${width - right}" y2="${top}"></line>
+        <line class="chart-gridline" x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"></line>
+
+        <text class="chart-y-label" x="2" y="${top + 4}">${formatNumber(geometry.maxValue)}${suffix}</text>
+        <text class="chart-y-label" x="2" y="${height - bottom + 4}">${formatNumber(geometry.minValue)}${suffix}</text>
+
+        ${seriesMarkup}
       </svg>
-      <div class="chart-axis"><span>${startLabel}</span><span>${endLabel}</span></div>
+      <div class="chart-axis">
+        <span>${axisDate(geometry.minTime, days)}</span>
+        <span>${axisDate(geometry.maxTime, days)}</span>
+      </div>
+    </div>
+  `;
+}
+
+function metricCard({
+  title,
+  headline,
+  context,
+  detail,
+  chart = "",
+  compact = false
+}) {
+  return `
+    <article class="metric-card${compact ? " metric-card-compact" : ""}">
+      <div class="metric-header">
+        <span class="metric-title">${title}</span>
+        ${context ? `<span class="metric-context">${context}</span>` : ""}
+      </div>
+      <strong class="metric-value">${headline}</strong>
+      ${detail ? `<p class="metric-detail">${detail}</p>` : ""}
+      ${chart}
     </article>
   `;
 }
 
-export function renderDashboard(summaryContainer, chartContainer, entries, days) {
+function attachChartInspection(container) {
+  const activate = point => {
+    const card = point.closest(".metric-card");
+    const readout = card?.querySelector(".chart-readout");
+    if (!readout) return;
+
+    readout.textContent =
+      point.dataset.inspectValue + " · " + point.dataset.inspectDate;
+
+    card.querySelectorAll(".chart-point.active").forEach(active => {
+      active.classList.remove("active");
+    });
+    point.classList.add("active");
+  };
+
+  container.querySelectorAll(".chart-point").forEach(point => {
+    point.addEventListener("click", () => activate(point));
+    point.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activate(point);
+      }
+    });
+  });
+}
+
+export function renderDashboard(container, entries, days) {
   const stats = summarize(entries, days);
   const trends = buildTrendSeries(entries, days);
 
-  summaryContainer.innerHTML = [
-    summaryCard(
-      "Weight",
-      stats.latestWeight === null ? "—" : formatNumber(stats.latestWeight) + " lb",
-      stats.weightChange === null ? "Need 2+ measurements" : signed(stats.weightChange, " lb")
-    ),
-    summaryCard(
-      "Average BP",
-      stats.avgSystolic === null || stats.avgDiastolic === null
-        ? "—"
-        : Math.round(stats.avgSystolic) + "/" + Math.round(stats.avgDiastolic),
-      stats.avgSystolic === null ? "No readings" : "Across this range"
-    ),
-    summaryCard(
-      "Workouts",
-      String(stats.workoutCount),
-      stats.workoutMinutes + " total min"
-    ),
-    summaryCard(
-      "Sleep",
-      stats.avgSleep === null ? "—" : formatNumber(stats.avgSleep) + " h",
-      stats.avgEnergy === null ? "No check-ins" : "Avg energy " + formatNumber(stats.avgEnergy) + "/5"
-    )
+  const weightChange = formatChange(stats.weightChange, " lb");
+  const waistChange = formatChange(stats.waistChange, " in");
+
+  const weightDetail = [
+    stats.latestWaist !== null ? `Waist ${formatNumber(stats.latestWaist)} in` : null,
+    waistChange ? `${waistChange} waist` : null
+  ].filter(Boolean).join(" • ");
+
+  const latestBp = stats.latestSystolic !== null && stats.latestDiastolic !== null
+    ? `Latest ${Math.round(stats.latestSystolic)}/${Math.round(stats.latestDiastolic)}`
+    : null;
+
+  const averageBp = stats.avgSystolic !== null && stats.avgDiastolic !== null
+    ? `${Math.round(stats.avgSystolic)}/${Math.round(stats.avgDiastolic)}`
+    : "—";
+
+  const sleepDetail = [
+    stats.avgSleepQuality !== null ? `Quality ${formatNumber(stats.avgSleepQuality)}/5` : null,
+    stats.avgEnergy !== null ? `Energy ${formatNumber(stats.avgEnergy)}/5` : null
+  ].filter(Boolean).join(" • ");
+
+  container.innerHTML = [
+    metricCard({
+      title: "Weight",
+      headline: stats.latestWeight === null ? "—" : `${formatNumber(stats.latestWeight)} lb`,
+      context: weightChange ? `${weightChange} in range` : "Latest reading",
+      detail: weightDetail || "No waist reading in this range",
+      chart: chartMarkup(
+        "Weight",
+        [{ label: "Weight", points: trends.weight }],
+        days,
+        " lb"
+      )
+    }),
+    metricCard({
+      title: "Blood pressure",
+      headline: stats.avgSystolic === null ? "—" : `Avg ${averageBp}`,
+      context: latestBp,
+      detail: stats.latestPulse !== null
+        ? `Latest pulse ${Math.round(stats.latestPulse)} bpm`
+        : "No pulse reading in this range",
+      chart: chartMarkup(
+        "Blood pressure",
+        [
+          { label: "Sys", points: trends.systolic },
+          { label: "Dia", points: trends.diastolic }
+        ],
+        days
+      )
+    }),
+    metricCard({
+      title: "Sleep",
+      headline: stats.avgSleep === null ? "—" : `Avg ${formatNumber(stats.avgSleep)} h`,
+      context: stats.avgSleep === null ? null : "Across this range",
+      detail: sleepDetail || "No daily check-ins in this range",
+      chart: chartMarkup(
+        "Sleep",
+        [{ label: "Sleep", points: trends.sleep }],
+        days,
+        " h"
+      )
+    }),
+    metricCard({
+      title: "Activity",
+      headline: `${stats.workoutCount} ${stats.workoutCount === 1 ? "workout" : "workouts"}`,
+      context: `${stats.workoutMinutes} min total`,
+      detail: stats.latestWorkoutType
+        ? `Latest: ${stats.latestWorkoutType}`
+        : "No workouts in this range",
+      compact: true
+    })
   ].join("");
 
-  chartContainer.innerHTML = [
-    lineChart("Weight", [{ label: "Latest", points: trends.weight }], days, " lb"),
-    lineChart("Blood pressure", [
-      { label: "Sys", points: trends.systolic },
-      { label: "Dia", points: trends.diastolic }
-    ], days),
-    lineChart("Sleep", [{ label: "Sleep", points: trends.sleep }], days, " h"),
-    lineChart("Energy", [{ label: "Energy", points: trends.energy }], days, "/5")
-  ].join("");
+  attachChartInspection(container);
 }
