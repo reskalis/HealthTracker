@@ -60,11 +60,19 @@ function lineChart(title, series, suffix = "") {
   const width = 320;
   const height = 150;
   const padding = 18;
-  const paths = usable.map((item, index) => `
-    <path class="chart-line chart-line-${index + 1}"
-      d="${pointPath(item.points, width, height, padding, min, max)}"
-      vector-effect="non-scaling-stroke" />
-  `).join("");
+  const paths = usable.map((item, index) => {
+    const path = `
+      <path class="chart-line chart-line-${index + 1}"
+        d="${pointPath(item.points, width, height, padding, min, max)}"
+        vector-effect="non-scaling-stroke" />
+    `;
+
+    const singlePoint = item.points.length === 1
+      ? `<circle class="chart-dot chart-dot-${index + 1}" cx="${width / 2}" cy="${height / 2}" r="4"></circle>`
+      : "";
+
+    return path + singlePoint;
+  }).join("");
 
   const latest = usable.map(item => {
     const point = item.points.at(-1);
