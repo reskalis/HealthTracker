@@ -16,13 +16,15 @@ Use this checklist before treating a deployment as ready for real health data.
 4. Confirm each record appears under **History** and the type filters work.
 5. Edit one dummy record and confirm the change persists after reload.
 6. Delete one dummy record and confirm only that record is removed.
-7. Check the 7D, 30D, and 90D dashboard ranges.
-8. Export `healthtracker_backup.csv`.
-9. Confirm the file contains all records and the expected backup schema version.
-10. Restore that backup and verify the record count matches.
-11. Reload the app and confirm records remain.
-12. Put the device offline, reopen HealthTracker, and confirm the app loads and records remain available.
-13. Return online and verify the network status updates.
+7. Check the 1D, 7D, 30D, and 90D trend ranges.
+8. Tap chart points and confirm the value/time readout updates.
+9. Expand History, verify date grouping, expand an individual row, and test the type filter.
+10. Export `healthtracker_backup.csv`.
+11. Confirm the file contains all records and the expected backup schema version.
+12. Restore that backup and verify the record count matches.
+13. Reload the app and confirm records remain.
+14. Put the device offline, reopen HealthTracker, and confirm the app loads and records remain available.
+15. Return online and verify the network status updates.
 
 ## Update test
 1. Deploy a build with a new build ID and service-worker cache release ID.
