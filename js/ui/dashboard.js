@@ -118,9 +118,7 @@ export function renderDashboard(summaryContainer, chartContainer, entries, days)
       { label: "Sys", points: trends.systolic },
       { label: "Dia", points: trends.diastolic }
     ]),
-    lineChart("Sleep & energy", [
-      { label: "Sleep", points: trends.sleep },
-      { label: "Energy", points: trends.energy }
-    ])
+    lineChart("Sleep", [{ label: "Sleep", points: trends.sleep }], " h"),
+    lineChart("Energy", [{ label: "Energy", points: trends.energy }], "/5")
   ].join("");
 }
