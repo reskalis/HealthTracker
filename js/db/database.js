@@ -52,6 +52,22 @@ export async function clearEntries() {
   await requestToPromise(objectStore.clear());
 }
 
+export async function replaceEntries(entries) {
+  const db = await openDatabase();
+
+  await new Promise((resolve, reject) => {
+    const transaction = db.transaction(STORE, "readwrite");
+    const objectStore = transaction.objectStore(STORE);
+
+    objectStore.clear();
+    entries.forEach(entry => objectStore.put(entry));
+
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
+}
+
 /** One-time migration from the prototype's localStorage database. */
 export async function migrateLegacyLocalStorage() {
   const raw = localStorage.getItem(LEGACY_KEY);
