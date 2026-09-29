@@ -424,6 +424,14 @@ dialog::backdrop {
   stroke: var(--success);
 }
 
+.chart-dot {
+  fill: #dbe4f3;
+}
+
+.chart-dot-2 {
+  fill: var(--success);
+}
+
 .chart-empty {
   display: grid;
   place-items: center;
