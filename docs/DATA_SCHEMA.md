@@ -6,7 +6,7 @@ HealthTracker stores one record per health event. Every internal record has a UU
 
 HealthTracker versions three things independently:
 
-- App version: `0.3.0`
+- App version: `0.4.0`
 - IndexedDB schema version: `1`
 - CSV backup schema version: `2`
 
