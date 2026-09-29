@@ -41,7 +41,7 @@ The portable backup keeps a stable record ID and includes explicit format metada
 
 Columns:
 
-`backup_schema_version,app_version,id,datetime,type,sleep_hours,sleep_quality,energy,weight_lb,waist_in,systolic,diastolic,pulse,workout_type,duration_min,intensity,notes`
+`id,datetime,type,sleep_hours,sleep_quality,energy,weight_lb,waist_in,systolic,diastolic,pulse,workout_type,duration_min,intensity,notes,backup_schema_version,app_version`
 
 `backup_schema_version` and `app_version` are export metadata. They are not stored as health fields when a backup is restored.
 
