@@ -531,3 +531,17 @@ dialog::backdrop {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+
+.chart-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -2px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.range-picker button {
+  min-width: 34px;
+}
