@@ -2,6 +2,14 @@
   margin-top: 8px;
 }
 
+.dashboard-section > .section-heading {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: var(--bg);
+  padding-top: 8px;
+}
+
 .range-picker {
   display: flex;
   gap: 4px;
@@ -133,8 +141,8 @@
 
 .chart-point.active,
 .chart-point:focus {
-  r: 6;
-  stroke-width: 3;
+  stroke: var(--text);
+  stroke-width: 4;
   outline: none;
 }
 
