@@ -21,6 +21,7 @@ let entries = [];
 let activeForm = null;
 let activeEntryId = null;
 let historyFilter = "all";
+let historyLimit = 50;
 let dashboardRange = 30;
 let offlineReady = false;
 let online = navigator.onLine;
@@ -53,16 +54,21 @@ function renderCurrentHistory() {
 
   renderHistory($("#history"), entries, FORM_CONFIG, {
     filter: historyFilter,
+    limit: historyLimit,
     onEdit: id => {
       const entry = entries.find(item => item.id === id);
       if (entry) openForm(entry.type, entry);
     },
-    onDelete: handleDelete
+    onDelete: handleDelete,
+    onShowOlder: () => {
+      historyLimit += 50;
+      renderCurrentHistory();
+    }
   });
 }
 
 function renderCurrentDashboard() {
-  renderDashboard($("#summaryCards"), $("#charts"), entries, dashboardRange);
+  renderDashboard($("#trendCards"), entries, dashboardRange);
 }
 
 async function refresh() {
@@ -223,6 +229,7 @@ async function initialize() {
 
   $("#historyFilter").addEventListener("change", event => {
     historyFilter = event.target.value;
+    historyLimit = 50;
     renderCurrentHistory();
   });
 
