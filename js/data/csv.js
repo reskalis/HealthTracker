@@ -1,8 +1,6 @@
 import { APP_VERSION, BACKUP_SCHEMA_VERSION } from "../config/version.js";
 
 export const CSV_COLUMNS = [
-  "backup_schema_version",
-  "app_version",
   "id",
   "datetime",
   "type",
@@ -17,7 +15,9 @@ export const CSV_COLUMNS = [
   "workout_type",
   "duration_min",
   "intensity",
-  "notes"
+  "notes",
+  "backup_schema_version",
+  "app_version"
 ];
 
 const BACKUP_METADATA_COLUMNS = new Set([
@@ -126,6 +126,8 @@ export function csvToEntries(text) {
       });
 
       entry.id ||= crypto.randomUUID();
+      entry.created_at ||= entry.datetime;
+      entry.updated_at ||= new Date().toISOString();
       return entry;
     });
 }
