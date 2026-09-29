@@ -1,0 +1,159 @@
+.dashboard-section {
+  margin-top: 8px;
+}
+
+.range-picker {
+  display: flex;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  padding: 3px;
+}
+
+.range-picker button {
+  min-width: 34px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.range-picker button.active {
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.trend-cards {
+  display: grid;
+  gap: 10px;
+  padding: 0 16px 28px;
+}
+
+.metric-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+  padding: 16px;
+}
+
+.metric-card-compact {
+  min-height: 120px;
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.metric-title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.metric-context {
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+.metric-value {
+  display: block;
+  margin-top: 7px;
+  font-size: 27px;
+  letter-spacing: -0.02em;
+}
+
+.metric-detail {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.metric-chart {
+  margin-top: 13px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.chart-readout {
+  min-height: 17px;
+  margin-bottom: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+.metric-chart svg {
+  display: block;
+  width: 100%;
+  height: 148px;
+  overflow: visible;
+}
+
+.chart-gridline {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.chart-y-label {
+  fill: var(--muted);
+  font-size: 9px;
+}
+
+.chart-line {
+  fill: none;
+  stroke: #dbe4f3;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-line-2 {
+  stroke: var(--success);
+}
+
+.chart-point {
+  fill: #dbe4f3;
+  stroke: var(--panel);
+  stroke-width: 2;
+  cursor: pointer;
+  transition: r 0.12s ease, stroke-width 0.12s ease;
+}
+
+.chart-point-2 {
+  fill: var(--success);
+}
+
+.chart-point.active,
+.chart-point:focus {
+  r: 6;
+  stroke-width: 3;
+  outline: none;
+}
+
+.chart-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: -4px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.metric-chart-empty {
+  display: grid;
+  place-items: center;
+  min-height: 96px;
+  margin-top: 13px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
