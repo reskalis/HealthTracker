@@ -1,9 +1,16 @@
 import { FORM_CONFIG } from "./config/forms.js";
-import { getEntries, putEntry, replaceEntries, migrateLegacyLocalStorage } from "./db/database.js";
+import {
+  getEntries,
+  putEntry,
+  deleteEntry,
+  replaceEntries,
+  migrateLegacyLocalStorage
+} from "./db/database.js";
 import { exportBackup } from "./data/export.js";
 import { csvToEntries } from "./data/csv.js";
 import { renderFields } from "./ui/forms.js";
 import { renderHistory } from "./ui/history.js";
+import { renderDashboard } from "./ui/dashboard.js";
 import { showToast } from "./ui/toast.js";
 import { renderSystemStatus } from "./ui/status.js";
 import { registerPwaUpdates } from "./pwa/update.js";
@@ -12,8 +19,25 @@ const $ = selector => document.querySelector(selector);
 
 let entries = [];
 let activeForm = null;
+let activeEntryId = null;
+let historyFilter = "all";
+let dashboardRange = 30;
 let offlineReady = false;
 let online = navigator.onLine;
+
+function toLocalDateTimeInput(isoString) {
+  const date = new Date(isoString);
+  const pad = value => String(value).padStart(2, "0");
+
+  return [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate())
+  ].join("-") + "T" + [
+    pad(date.getHours()),
+    pad(date.getMinutes())
+  ].join(":");
+}
 
 function refreshSystemStatus() {
   renderSystemStatus({
@@ -24,40 +48,95 @@ function refreshSystemStatus() {
   });
 }
 
+function renderCurrentHistory() {
+  renderHistory($("#history"), entries, FORM_CONFIG, {
+    filter: historyFilter,
+    onEdit: id => {
+      const entry = entries.find(item => item.id === id);
+      if (entry) openForm(entry.type, entry);
+    },
+    onDelete: handleDelete
+  });
+}
+
+function renderCurrentDashboard() {
+  renderDashboard($("#summaryCards"), $("#charts"), entries, dashboardRange);
+}
+
 async function refresh() {
   entries = await getEntries();
-  renderHistory($("#recent"), entries, FORM_CONFIG);
+  renderCurrentHistory();
+  renderCurrentDashboard();
   refreshSystemStatus();
 }
 
-function openForm(type) {
+function openForm(type, entry = null) {
   activeForm = type;
-  const config = FORM_CONFIG[type];
+  activeEntryId = entry?.id ?? null;
 
-  $("#formTitle").textContent = config.title;
-  $("#fields").innerHTML = renderFields(config.fields);
-  $("#entryForm").reset();
+  const config = FORM_CONFIG[type];
+  const datetime = entry?.datetime ?? new Date().toISOString();
+  const titlePrefix = entry ? "Edit " : "";
+
+  $("#formTitle").textContent = titlePrefix + config.title;
+  $("#saveEntry").textContent = entry ? "Save changes" : "Save entry";
+
+  $("#fields").innerHTML = `
+    <div class="field">
+      <label for="entryDatetime">Date & time</label>
+      <input
+        id="entryDatetime"
+        name="datetime"
+        type="datetime-local"
+        value="${toLocalDateTimeInput(datetime)}"
+        required
+      >
+    </div>
+  ` + renderFields(config.fields, entry ?? {});
+
   $("#modal").showModal();
 }
 
 async function handleSubmit(event) {
   event.preventDefault();
 
-  const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const localDatetime = formData.datetime;
+  delete formData.datetime;
+
   const timestamp = new Date().toISOString();
+  const existing = activeEntryId
+    ? entries.find(entry => entry.id === activeEntryId)
+    : null;
 
   await putEntry({
-    id: crypto.randomUUID(),
+    ...existing,
+    id: existing?.id ?? crypto.randomUUID(),
     type: activeForm,
-    datetime: timestamp,
-    created_at: timestamp,
+    datetime: new Date(localDatetime).toISOString(),
+    created_at: existing?.created_at ?? timestamp,
     updated_at: timestamp,
-    ...data
+    ...formData
   });
 
   $("#modal").close();
+  activeEntryId = null;
   await refresh();
-  showToast("Saved");
+  showToast(existing ? "Changes saved" : "Saved");
+}
+
+async function handleDelete(id) {
+  const entry = entries.find(item => item.id === id);
+  if (!entry) return;
+
+  const title = FORM_CONFIG[entry.type]?.title ?? "entry";
+  if (!confirm("Delete this " + title.toLowerCase() + "? This cannot be undone unless it exists in a backup.")) {
+    return;
+  }
+
+  await deleteEntry(id);
+  await refresh();
+  showToast("Entry deleted");
 }
 
 async function handleExport() {
@@ -90,6 +169,16 @@ async function handleRestore(event) {
   } finally {
     event.target.value = "";
   }
+}
+
+function setDashboardRange(days) {
+  dashboardRange = days;
+
+  document.querySelectorAll("[data-range]").forEach(button => {
+    button.classList.toggle("active", Number(button.dataset.range) === days);
+  });
+
+  renderCurrentDashboard();
 }
 
 async function initializePwa() {
@@ -126,7 +215,20 @@ async function initialize() {
     button.addEventListener("click", () => openForm(button.dataset.form));
   });
 
-  $("#close").addEventListener("click", () => $("#modal").close());
+  document.querySelectorAll("[data-range]").forEach(button => {
+    button.addEventListener("click", () => setDashboardRange(Number(button.dataset.range)));
+  });
+
+  $("#historyFilter").addEventListener("change", event => {
+    historyFilter = event.target.value;
+    renderCurrentHistory();
+  });
+
+  $("#close").addEventListener("click", () => {
+    activeEntryId = null;
+    $("#modal").close();
+  });
+
   $("#entryForm").addEventListener("submit", handleSubmit);
   $("#backup").addEventListener("click", handleExport);
   $("#restore").addEventListener("click", () => $("#restoreInput").click());
