@@ -21,20 +21,51 @@ function summaryCard(label, value, detail) {
   `;
 }
 
-function pointPath(points, width, height, padding, min, max) {
+function timeBounds(series) {
+  const times = series.flatMap(item =>
+    item.points
+      .map(point => new Date(point.date).getTime())
+      .filter(Number.isFinite)
+  );
+
+  if (!times.length) return null;
+
+  return {
+    min: Math.min(...times),
+    max: Math.max(...times)
+  };
+}
+
+function pointPath(points, width, height, padding, minValue, maxValue, minTime, maxTime) {
   if (!points.length) return "";
-  const span = max - min || 1;
-  const xStep = points.length > 1 ? (width - padding * 2) / (points.length - 1) : 0;
+
+  const valueSpan = maxValue - minValue || 1;
+  const timeSpan = maxTime - minTime || 1;
 
   return points.map((point, index) => {
-    const x = points.length > 1 ? padding + index * xStep : width / 2;
-    const y = height - padding - ((point.value - min) / span) * (height - padding * 2);
+    const time = new Date(point.date).getTime();
+    const x = points.length === 1
+      ? width / 2
+      : padding + ((time - minTime) / timeSpan) * (width - padding * 2);
+
+    const y = height - padding -
+      ((point.value - minValue) / valueSpan) * (height - padding * 2);
+
     return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
   }).join(" ");
 }
 
-function lineChart(title, series, suffix = "") {
+function axisLabel(timestamp, days) {
+  const date = new Date(timestamp);
+
+  return days === 1
+    ? date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+    : date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function lineChart(title, series, days, suffix = "") {
   const usable = series.filter(item => item.points.length);
+
   if (!usable.length) {
     return `
       <article class="chart-card">
@@ -45,25 +76,30 @@ function lineChart(title, series, suffix = "") {
   }
 
   const allValues = usable.flatMap(item => item.points.map(point => point.value));
-  let min = Math.min(...allValues);
-  let max = Math.max(...allValues);
+  let minValue = Math.min(...allValues);
+  let maxValue = Math.max(...allValues);
 
-  if (min === max) {
-    min -= 1;
-    max += 1;
+  if (minValue === maxValue) {
+    minValue -= 1;
+    maxValue += 1;
   } else {
-    const margin = (max - min) * 0.12;
-    min -= margin;
-    max += margin;
+    const margin = (maxValue - minValue) * 0.12;
+    minValue -= margin;
+    maxValue += margin;
   }
+
+  const bounds = timeBounds(usable);
+  const minTime = bounds?.min ?? Date.now();
+  const maxTime = bounds?.max ?? minTime + 1;
 
   const width = 320;
   const height = 150;
   const padding = 18;
+
   const paths = usable.map((item, index) => {
     const path = `
       <path class="chart-line chart-line-${index + 1}"
-        d="${pointPath(item.points, width, height, padding, min, max)}"
+        d="${pointPath(item.points, width, height, padding, minValue, maxValue, minTime, maxTime)}"
         vector-effect="non-scaling-stroke" />
     `;
 
@@ -79,6 +115,9 @@ function lineChart(title, series, suffix = "") {
     return `${item.label} ${formatNumber(point.value)}${suffix}`;
   }).join(" • ");
 
+  const startLabel = axisLabel(minTime, days);
+  const endLabel = axisLabel(maxTime, days);
+
   return `
     <article class="chart-card">
       <div class="chart-header"><strong>${title}</strong><span>${latest}</span></div>
@@ -87,6 +126,7 @@ function lineChart(title, series, suffix = "") {
         <line class="chart-gridline" x1="18" y1="18" x2="302" y2="18"></line>
         ${paths}
       </svg>
+      <div class="chart-axis"><span>${startLabel}</span><span>${endLabel}</span></div>
     </article>
   `;
 }
@@ -121,12 +161,12 @@ export function renderDashboard(summaryContainer, chartContainer, entries, days)
   ].join("");
 
   chartContainer.innerHTML = [
-    lineChart("Weight", [{ label: "Latest", points: trends.weight }], " lb"),
+    lineChart("Weight", [{ label: "Latest", points: trends.weight }], days, " lb"),
     lineChart("Blood pressure", [
       { label: "Sys", points: trends.systolic },
       { label: "Dia", points: trends.diastolic }
-    ]),
-    lineChart("Sleep", [{ label: "Sleep", points: trends.sleep }], " h"),
-    lineChart("Energy", [{ label: "Energy", points: trends.energy }], "/5")
+    ], days),
+    lineChart("Sleep", [{ label: "Sleep", points: trends.sleep }], days, " h"),
+    lineChart("Energy", [{ label: "Energy", points: trends.energy }], days, "/5")
   ].join("");
 }
