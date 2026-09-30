@@ -7,6 +7,6 @@
  * - BACKUP_SCHEMA_VERSION changes only when the portable CSV format changes.
  */
 export const APP_VERSION = "0.9.1";
-export const BUILD_ID = "2026-09-30.20";
+export const BUILD_ID = "2026-09-30.21";
 export const DB_SCHEMA_VERSION = 1;
 export const BACKUP_SCHEMA_VERSION = 2;
