@@ -71,6 +71,20 @@ function syncDateTimeDisplay() {
   display.textContent = formatDateTimeDisplay(input.value);
 }
 
+function requestNativeDateTimePicker(input) {
+  if (typeof input?.showPicker !== "function") return;
+
+  try {
+    input.showPicker();
+  } catch (error) {
+    // Browsers may reject showPicker() outside an allowed user gesture.
+    // Native input behavior remains the fallback.
+    if (error?.name !== "NotAllowedError") {
+      console.debug("Native date/time picker request was unavailable:", error);
+    }
+  }
+}
+
 function refreshBackupReminder() {
   const state = getBackupReminderState({
     recordCount: entries.length,
@@ -163,6 +177,15 @@ function openForm(type, entry = null) {
   const datetimeInput = $("#entryDatetime");
   datetimeInput.addEventListener("input", syncDateTimeDisplay);
   datetimeInput.addEventListener("change", syncDateTimeDisplay);
+  datetimeInput.addEventListener("click", event => {
+    if (event.pointerType === "touch") return;
+    requestNativeDateTimePicker(datetimeInput);
+  });
+  datetimeInput.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") {
+      requestNativeDateTimePicker(datetimeInput);
+    }
+  });
   syncDateTimeDisplay();
 }
 
