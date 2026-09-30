@@ -30,33 +30,9 @@
   </header>
 
   <main>
-    <section class="hero">
+    <section class="hero" aria-label="Today">
       <p id="today"></p>
-      <h2>How are you doing?</h2>
-      <p>Your records stay on this device until you export them.</p>
     </section>
-
-    <details class="status-panel">
-      <summary>
-        <span>Data & app status</span>
-        <span id="networkStatus" class="status-badge">Online</span>
-      </summary>
-      <div class="status-grid">
-        <div><span>App</span><strong id="appVersion">—</strong></div>
-        <div><span>Records</span><strong id="recordCount">0</strong></div>
-        <div><span>Database</span><strong id="dbVersion">—</strong></div>
-        <div><span>Backup format</span><strong id="backupVersion">—</strong></div>
-      </div>
-      <p id="offlineStatus" class="status-note">Offline setup pending</p>
-      <p id="lastBackup" class="status-note">No backup yet</p>
-      <p class="build-note">Build <span id="buildId">—</span></p>
-
-      <details class="data-management">
-        <summary>Data management</summary>
-        <p>Delete the health records stored by HealthTracker on this device. Exported CSV backups are not affected.</p>
-        <button id="deleteAllData" class="danger-button" type="button">Delete all local health data</button>
-      </details>
-    </details>
 
     <aside id="backupReminder" class="backup-reminder" hidden>
       <div>
@@ -71,11 +47,11 @@
 
     <section class="grid" aria-label="Quick log">
       <button class="card" data-form="daily">
-        <b>☀️ Daily check-in</b>
-        <span>Sleep, quality & energy</span>
+        <b>🌙 Sleep</b>
+        <span>Hours, quality & energy</span>
       </button>
       <button class="card" data-form="measurement">
-        <b>⚖️ Weight & waist</b>
+        <b>⚖️ Weight</b>
         <span>Body measurements</span>
       </button>
       <button class="card" data-form="bp">
@@ -120,7 +96,7 @@
             <span class="sr-only">Filter history</span>
             <select id="historyFilter">
               <option value="all">All</option>
-              <option value="daily">Daily</option>
+              <option value="daily">Sleep</option>
               <option value="measurement">Weight</option>
               <option value="bp">Blood pressure</option>
               <option value="workout">Workouts</option>
@@ -130,6 +106,29 @@
         <div id="history" class="history-list"></div>
       </div>
     </details>
+
+    <details class="status-panel">
+      <summary>
+        <span>Data & app status</span>
+        <span id="networkStatus" class="status-badge">Online</span>
+      </summary>
+      <div class="status-grid">
+        <div><span>App</span><strong id="appVersion">—</strong></div>
+        <div><span>Records</span><strong id="recordCount">0</strong></div>
+        <div><span>Database</span><strong id="dbVersion">—</strong></div>
+        <div><span>Backup format</span><strong id="backupVersion">—</strong></div>
+      </div>
+      <p id="offlineStatus" class="status-note">Offline setup pending</p>
+      <p id="lastBackup" class="status-note">No backup yet</p>
+      <p class="build-note">Build <span id="buildId">—</span></p>
+
+      <details class="data-management">
+        <summary>Data management</summary>
+        <p>Delete the health records stored by HealthTracker on this device. Exported CSV backups are not affected.</p>
+        <button id="deleteAllData" class="danger-button" type="button">Delete all local health data</button>
+      </details>
+    </details>
+
   </main>
 
   <dialog id="modal" aria-labelledby="formTitle">
