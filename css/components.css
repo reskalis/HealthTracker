@@ -56,6 +56,66 @@ header {
   font-size: 14px;
 }
 
+.install-prompt {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin: 0 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--success) 45%, var(--line));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--panel-2) 68%, var(--panel));
+  padding: 13px 14px;
+}
+
+.install-prompt[hidden] {
+  display: none;
+}
+
+.install-prompt strong {
+  display: block;
+  font-size: 13px;
+}
+
+.install-prompt p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.install-prompt-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.install-prompt-actions a,
+.install-prompt-actions button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.install-prompt-actions a {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 11px;
+  text-decoration: none;
+}
+
+.install-prompt-actions button {
+  min-width: 44px;
+  padding: 0;
+  font-size: 20px;
+  line-height: 1;
+}
+
 .status-panel {
   margin: 8px 16px 100px;
   border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
@@ -303,6 +363,8 @@ dialog::backdrop {
 
 @media (hover: hover) and (pointer: fine) {
   .header-actions button:hover,
+  .install-prompt-actions a:hover,
+  .install-prompt-actions button:hover,
   .range-picker button:hover,
   .history-entry > summary:hover,
   .history-entry-actions button:hover,
@@ -328,6 +390,20 @@ dialog::backdrop {
 }
 
 @media (max-width: 460px) {
+  .install-prompt {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .install-prompt-actions {
+    width: 100%;
+  }
+
+  .install-prompt-actions a {
+    flex: 1;
+    justify-content: center;
+  }
+
   .card {
     min-height: 88px;
   }
