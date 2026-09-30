@@ -73,6 +73,18 @@ HealthTracker is offline-capable without silently trapping users on stale code.
 
 The app intentionally uses vanilla HTML, CSS, and JavaScript with no runtime dependencies, build process, external CDN, analytics, or network API.
 
+### Automated tests
+
+HealthTracker uses Node's built-in test runner, so the test suite adds no application runtime dependencies.
+
+Run locally with:
+
+```sh
+npm test
+```
+
+GitHub Actions runs the same suite on every push and pull request using Node 22. The tests cover portable CSV round-tripping and strict restore validation, backup reminder behavior, date-range boundaries, future-record exclusion, descriptive summary math, workout counts/minutes, blank numeric handling, and trend ordering.
+
 To add a health metric:
 
 1. Define the field and validation in `js/config/forms.js`.
