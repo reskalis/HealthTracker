@@ -1,0 +1,1 @@
+whisper.cpp v1.7.6 · Emscripten 4.0.14 · no pthreads
