@@ -45,6 +45,10 @@ HealthTracker keeps three versions separate:
 
 The current values are defined in `js/config/version.js` and surfaced in the app under **Data & app status**.
 
+## Responsive and accessible UI
+
+HealthTracker is designed around available space rather than specific phone models. Core layouts use flexible grids and wrapping, interactive controls use touch-friendly target sizes, dialogs keep native keyboard/Escape behavior, visible keyboard focus is preserved, and reduced-motion preferences are respected. The native date/time picker remains platform-owned while HealthTracker controls the visible field presentation.
+
 ## Trends and history
 
 Trend summaries are calculated entirely on-device from IndexedDB records. HealthTracker supports 1-, 7-, 30-, and 90-day descriptive views. Each metric is presented as one readable card so the headline number, context, and chart stay together.
