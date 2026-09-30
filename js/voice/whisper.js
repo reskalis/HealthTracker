@@ -19,7 +19,7 @@ async function objects() {
   if (service && manager) return { service, manager };
 
   const { WhisperWasmService, ModelManager } = await runtime();
-  service = new WhisperWasmService({ logLevel: 3 });
+  service = new WhisperWasmService({ logLevel: 2 });
   manager = new ModelManager({ logLevel: 3 });
   return { service, manager };
 }
@@ -82,6 +82,29 @@ export async function prepareVoiceModel(onProgress = () => {}) {
   }
 }
 
+function audioStats(audioData) {
+  let peak = 0;
+  let sumSquares = 0;
+
+  for (let i = 0; i < audioData.length; i++) {
+    const value = audioData[i];
+    const abs = Math.abs(value);
+    if (abs > peak) peak = abs;
+    sumSquares += value * value;
+  }
+
+  const rms = audioData.length
+    ? Math.sqrt(sumSquares / audioData.length)
+    : 0;
+
+  return {
+    samples: audioData.length,
+    durationSeconds: audioData.length / 16000,
+    peak,
+    rms
+  };
+}
+
 export async function transcribeVoiceAudio(blob, {
   onProgress = () => {}
 } = {}) {
@@ -90,9 +113,18 @@ export async function transcribeVoiceAudio(blob, {
   const { service } = await objects();
   const { convertFromArrayBuffer } = await runtime();
 
+  const diagnostics = {
+    timestamp: new Date().toISOString(),
+    crossOriginIsolated: Boolean(globalThis.crossOriginIsolated),
+    userAgent: navigator.userAgent,
+    hardwareConcurrency: Number(navigator.hardwareConcurrency) || null,
+    blobType: blob.type || "unknown",
+    blobBytes: blob.size
+  };
+
   onProgress(100, "Preparing audio…");
   const buffer = await blob.arrayBuffer();
-  const { audioData } = await convertFromArrayBuffer(buffer, {
+  const { audioData, audioInfo, warnings } = await convertFromArrayBuffer(buffer, {
     targetSampleRate: 16000,
     targetChannels: 1,
     normalize: true,
@@ -100,22 +132,54 @@ export async function transcribeVoiceAudio(blob, {
     logLevel: "ERROR"
   });
 
+  diagnostics.audioInfo = audioInfo ?? null;
+  diagnostics.audioWarnings = warnings ?? [];
+  diagnostics.audio = audioStats(audioData);
+
   const hardwareThreads = Number(navigator.hardwareConcurrency) || 2;
   const threads = Math.max(1, Math.min(4, hardwareThreads));
+  diagnostics.threads = threads;
 
-  onProgress(100, "Transcribing locally…");
-  const result = await service.transcribe(audioData, undefined, {
-    language: "en",
-    threads,
-    translate: false
-  });
+  const runtimeWarnings = [];
+  const originalWarn = console.warn;
+  console.warn = (...args) => {
+    runtimeWarnings.push(args.map(value => {
+      try {
+        return typeof value === "string" ? value : JSON.stringify(value);
+      } catch {
+        return String(value);
+      }
+    }).join(" "));
+    originalWarn.apply(console, args);
+  };
 
-  const transcript = result.segments
+  let result;
+  try {
+    onProgress(100, "Transcribing locally…");
+    result = await service.transcribe(audioData, undefined, {
+      language: "en",
+      threads,
+      translate: false
+    });
+  } finally {
+    console.warn = originalWarn;
+  }
+
+  diagnostics.runtimeWarnings = runtimeWarnings;
+  diagnostics.segmentCount = result?.segments?.length ?? 0;
+  diagnostics.transcribeDurationMs = result?.transcribeDurationMs ?? null;
+  diagnostics.segments = (result?.segments ?? []).map(segment => ({
+    timeStart: segment.timeStart,
+    timeEnd: segment.timeEnd,
+    text: segment.text
+  }));
+
+  const transcript = (result?.segments ?? [])
     .map(segment => segment.text)
     .join(" ")
     .replace(/\s+/g, " ")
     .trim();
 
   onProgress(100, transcript ? "Transcription complete." : "No speech detected.");
-  return transcript;
+  return { transcript, diagnostics };
 }
