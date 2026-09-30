@@ -36,7 +36,17 @@ export async function voiceModelStatus() {
   };
 }
 
+function requireIsolatedRuntime() {
+  if (globalThis.crossOriginIsolated) return;
+
+  throw new Error(
+    "Local Whisper needs the updated app security context. Reload HealthTracker once, then try Talk again."
+  );
+}
+
 export async function prepareVoiceModel(onProgress = () => {}) {
+  requireIsolatedRuntime();
+
   if (modelReady) {
     onProgress(100, "Voice model ready.");
     return;
