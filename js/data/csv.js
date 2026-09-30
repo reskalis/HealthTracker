@@ -48,8 +48,8 @@ export function entriesToCsv(entries) {
 }
 
 /**
- * Parses CSV without interpreting HealthTracker semantics.
- * Throws on malformed quoting so restore never silently guesses.
+ * Strict RFC-style CSV parser for restore files.
+ * It rejects malformed quoting rather than guessing at the intended value.
  */
 export function parseCsvRows(text) {
   const source = String(text ?? "").replace(/^\uFEFF/, "");
@@ -57,6 +57,19 @@ export function parseCsvRows(text) {
   let row = [];
   let field = "";
   let quoted = false;
+  let justClosedQuote = false;
+
+  const finishField = () => {
+    row.push(field);
+    field = "";
+    justClosedQuote = false;
+  };
+
+  const finishRow = () => {
+    finishField();
+    rows.push(row);
+    row = [];
+  };
 
   for (let i = 0; i < source.length; i++) {
     const char = source[i];
@@ -67,22 +80,39 @@ export function parseCsvRows(text) {
         i++;
       } else if (char === '"') {
         quoted = false;
+        justClosedQuote = true;
       } else {
         field += char;
       }
       continue;
     }
 
+    if (justClosedQuote) {
+      if (char === ",") {
+        finishField();
+      } else if (char === "\n") {
+        finishRow();
+      } else if (char === "\r" && source[i + 1] === "\n") {
+        i++;
+        finishRow();
+      } else {
+        throw new Error("Backup contains unexpected text after a quoted field.");
+      }
+      continue;
+    }
+
     if (char === '"') {
+      if (field.length) {
+        throw new Error("Backup contains a quote inside an unquoted field.");
+      }
       quoted = true;
     } else if (char === ",") {
-      row.push(field);
-      field = "";
+      finishField();
     } else if (char === "\n") {
-      row.push(field.replace(/\r$/, ""));
-      rows.push(row);
-      row = [];
-      field = "";
+      finishRow();
+    } else if (char === "\r" && source[i + 1] === "\n") {
+      i++;
+      finishRow();
     } else {
       field += char;
     }
@@ -92,9 +122,8 @@ export function parseCsvRows(text) {
     throw new Error("Backup contains an unterminated quoted field.");
   }
 
-  if (field || row.length) {
-    row.push(field.replace(/\r$/, ""));
-    rows.push(row);
+  if (justClosedQuote || field || row.length) {
+    finishRow();
   }
 
   return rows;
