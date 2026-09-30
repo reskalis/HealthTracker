@@ -131,7 +131,7 @@ export async function prepareVoiceModel(onProgress = () => {}) {
     }
 
     onProgress(0, "Loading local voice model…");
-    const model = await manager.loadModel(MODEL_ID, true, progress => {
+    await manager.loadModel(MODEL_ID, true, progress => {
       onProgress(progress, progress >= 100
         ? "Preparing Whisper…"
         : `Downloading local voice model… ${progress}%`);
@@ -139,7 +139,6 @@ export async function prepareVoiceModel(onProgress = () => {}) {
 
     // The model is cached here on the page, but initialized inside a dedicated
     // Worker so inference cannot freeze HealthTracker's UI.
-    model = null;
     onProgress(100, "Starting local Whisper…");
     await ensureWorkerReady();
 
