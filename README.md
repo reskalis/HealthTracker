@@ -76,6 +76,8 @@ The current prototype includes local microphone capture, local Whisper transcrip
 
 The browser runtime is vendored in `vendor/whisper-wasm/` and pinned to version 0.1.0. The English `base.en-q5_1` model (~57 MB) is downloaded from the upstream whisper.cpp model host only after the private tester explicitly requests it, then cached in a separate IndexedDB database named `WhisperModels`. Health records remain in HealthTracker's existing IndexedDB database.
 
+Build `2026-09-30.19` temporarily forces Whisper inference to one thread. This is a compatibility diagnostic after iPhone Safari produced healthy decoded audio but the multithreaded WASM worker failed immediately. Adaptive threading can be restored after the browser path is confirmed.
+
 ## PWA update strategy
 
 HealthTracker is offline-capable without silently trapping users on stale code.
