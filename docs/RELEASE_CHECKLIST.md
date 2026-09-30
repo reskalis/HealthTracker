@@ -21,10 +21,16 @@ Use this checklist before treating a deployment as ready for real health data.
 9. Expand History, verify date grouping, expand an individual row, and test the type filter.
 10. Export `healthtracker_backup.csv`.
 11. Confirm the file contains all records and the expected backup schema version.
-12. Restore that backup and verify the record count matches.
-13. Reload the app and confirm records remain.
-14. Put the device offline, reopen HealthTracker, and confirm the app loads and records remain available.
-15. Return online and verify the network status updates.
+12. Open Restore and confirm the preview shows filename, record count, date range, type counts, and replacement warning before any data changes.
+13. Cancel the restore and confirm current records remain unchanged.
+14. Restore the valid backup and verify the record count matches.
+15. Try restoring a deliberately malformed backup and confirm it is rejected without changing current records.
+16. Confirm a duplicate-ID backup, malformed-date backup, and unknown-type backup are each rejected.
+17. Confirm the backup reminder appears when appropriate, can be snoozed, and clears after a successful export.
+18. Open **Data & app status → Data management**, verify deletion requires typing `DELETE`, then cancel without deleting.
+19. Reload the app and confirm records remain.
+20. Put the device offline, reopen HealthTracker, and confirm the app loads and records remain available.
+21. Return online and verify the network status updates.
 
 ## Update test
 1. Deploy a build with a new build ID and service-worker cache release ID.
