@@ -142,9 +142,10 @@ header {
 
 .card {
   min-height: 104px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--success) 58%, var(--line));
   border-radius: 18px;
-  background: var(--panel);
+  background: color-mix(in srgb, var(--panel-2) 72%, var(--panel));
+  box-shadow: 0 3px 12px #0003;
   padding: 18px;
   text-align: left;
 }
@@ -152,7 +153,9 @@ header {
 .card b {
   display: block;
   margin-bottom: 9px;
+  color: var(--text);
   font-size: 17px;
+  font-weight: 750;
 }
 
 .card span {
@@ -300,7 +303,6 @@ dialog::backdrop {
 
 @media (hover: hover) and (pointer: fine) {
   .header-actions button:hover,
-  .card:hover,
   .range-picker button:hover,
   .history-entry > summary:hover,
   .history-entry-actions button:hover,
@@ -310,6 +312,12 @@ dialog::backdrop {
   .danger-button:hover,
   .icon-button:hover {
     filter: brightness(1.12);
+  }
+
+  .card:hover {
+    border-color: color-mix(in srgb, var(--success) 82%, var(--line));
+    background: color-mix(in srgb, var(--panel-2) 86%, var(--panel));
+    filter: brightness(1.05);
   }
 
   .status-panel > summary:hover,
