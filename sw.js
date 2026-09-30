@@ -1,4 +1,4 @@
-const CACHE_VERSION = "0.7.0-20260930.8";
+const CACHE_VERSION = "0.8.0-20260930.9";
 const SHELL_CACHE = "healthtracker-shell-" + CACHE_VERSION;
 const RUNTIME_CACHE = "healthtracker-runtime-" + CACHE_VERSION;
 
@@ -6,6 +6,7 @@ const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./icons/healthtracker.svg",
   "./css/app.css",
   "./css/variables.css",
   "./css/base.css",
