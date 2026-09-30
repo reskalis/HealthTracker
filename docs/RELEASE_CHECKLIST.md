@@ -46,6 +46,16 @@ Use this checklist before treating a deployment as ready for real health data.
 6. Scan the install-page QR code with a phone and confirm it resolves to the HealthTracker install page.
 7. Confirm **Open HealthTracker** returns to the main app.
 
+## Private voice experiment test
+1. Confirm the normal app does not show **Talk** without the local voice flag.
+2. Enable the experiment with `?voiceTest=1` and confirm **Talk** appears only on that browser.
+3. Open **Talk** and install the local Whisper model.
+4. Confirm model download progress is shown and the model remains available after reload.
+5. Record a short phrase and confirm the transcript appears without using any cloud speech API.
+6. Confirm the transcript parser produces review cards and does not save incomplete required fields.
+7. Save a complete detected record and confirm it appears in History.
+8. Disable the experiment with `?voiceTest=0` and confirm **Talk** disappears without deleting health records or the model cache.
+
 ## Update test
 1. Deploy a build with a new build ID and service-worker cache release ID.
 2. Reopen or focus the previously installed app.
