@@ -48,11 +48,11 @@ function workoutType(text) {
 
 function intensity(text) {
   const match = text.match(
-    /\b(very\s+high|very\s+hard|high|hard|medium|moderate|low|easy)\s+(?:intensity|workout|session)?\b/i
+    /\b(very\s+high|high|medium|low)\s+intensity\b|\b(very\s+hard|hard|moderate|easy)(?:\s+(?:intensity|workout|session))?\b/i
   );
   if (!match) return null;
 
-  const value = match[1].toLowerCase().replace(/\s+/g, " ");
+  const value = (match[1] ?? match[2]).toLowerCase().replace(/\s+/g, " ");
   return ({
     low: "Easy",
     easy: "Easy",
