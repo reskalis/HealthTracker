@@ -394,6 +394,9 @@ async function initialize() {
       stopButton: $("#stopVoiceRecording"),
       audioEl: $("#voiceAudio"),
       stateEl: $("#voiceState"),
+      installModelButton: $("#installVoiceModel"),
+      modelStatusEl: $("#voiceModelStatus"),
+      modelProgressEl: $("#voiceModelProgress"),
       onSaveDrafts: saveVoiceDrafts
     });
   }
