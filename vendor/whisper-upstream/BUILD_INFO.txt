@@ -1,0 +1,1 @@
+Official whisper.cpp whisper.wasm browser runtime; WASM embedded; pthreads enabled.
