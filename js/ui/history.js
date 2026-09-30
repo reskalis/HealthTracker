@@ -41,7 +41,7 @@ function primaryLabel(entry) {
     case "measurement": return "Weight";
     case "bp": return "Blood pressure";
     case "workout": return entry.workout_type || "Workout";
-    case "daily": return "Daily check-in";
+    case "daily": return "Sleep";
     default: return "Entry";
   }
 }
@@ -57,7 +57,7 @@ function primaryValue(entry) {
     case "workout":
       return entry.duration_min ? `${entry.duration_min} min` : "Workout";
     case "daily":
-      return entry.sleep_hours ? `${entry.sleep_hours}h sleep` : "Daily check-in";
+      return entry.sleep_hours ? `${entry.sleep_hours}h sleep` : "Sleep";
     default:
       return "Health entry";
   }
