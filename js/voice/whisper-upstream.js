@@ -260,7 +260,27 @@ async function decodeAudio(blob) {
     source.start(0);
 
     const rendered = await offline.startRendering();
-    return new Float32Array(rendered.getChannelData(0));
+    const audio = new Float32Array(rendered.getChannelData(0));
+
+    // Safari's MediaRecorder -> decodeAudioData path can yield a much quieter
+    // waveform than the upstream whisper.cpp microphone demo. Normalize only
+    // by a constant gain so we preserve the waveform while bringing speech
+    // into the range Whisper expects. The previous HealthTracker decoder also
+    // normalized recordings and produced healthy ~0.95 peaks on this iPhone.
+    let peak = 0;
+    for (const sample of audio) {
+      const absolute = Math.abs(sample);
+      if (absolute > peak) peak = absolute;
+    }
+
+    if (peak > 0 && peak < 0.95) {
+      const gain = 0.95 / peak;
+      for (let i = 0; i < audio.length; i++) {
+        audio[i] = Math.max(-1, Math.min(1, audio[i] * gain));
+      }
+    }
+
+    return audio;
   } finally {
     try {
       await context.close();
@@ -440,6 +460,7 @@ export async function transcribeVoiceAudio(blob, {
 
   const transcript = result.segments
     .map(segment => segment.text)
+    .filter(text => !/^\s*\[(?:BLANK_AUDIO|SILENCE)\]\s*$/i.test(text))
     .join(" ")
     .replace(/\s+/g, " ")
     .trim();
