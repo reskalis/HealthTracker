@@ -55,13 +55,12 @@ function formatDateTimeDisplay(localDateTime) {
   const date = new Date(localDateTime);
   if (Number.isNaN(date.getTime())) return "Choose date & time";
 
-  return date.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit"
-  }).replace(",", " at");
+  const month = date.toLocaleDateString(undefined, { month: "short" });
+  const day = String(date.getDate()).padStart(2, "0");
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+
+  return `${date.getFullYear()} ${month} ${day}, ${hour}:${minute}`;
 }
 
 function syncDateTimeDisplay() {
