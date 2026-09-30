@@ -53,7 +53,7 @@ test("legacy compatible backup without id or metadata receives an id", () => {
 });
 
 test("future backup schema is rejected", () => {
-  const csv = entriesToCsv([workout()]);
+  const csv = entriesToCsv([workout({ notes: "Test" })]);
   const rows = parseCsvRows(csv);
   const schemaIndex = rows[0].indexOf("backup_schema_version");
   rows[1][schemaIndex] = String(BACKUP_SCHEMA_VERSION + 1);
