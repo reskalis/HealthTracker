@@ -48,7 +48,24 @@
       <p id="offlineStatus" class="status-note">Offline setup pending</p>
       <p id="lastBackup" class="status-note">No backup yet</p>
       <p class="build-note">Build <span id="buildId">—</span></p>
+
+      <details class="data-management">
+        <summary>Data management</summary>
+        <p>Delete the health records stored by HealthTracker on this device. Exported CSV backups are not affected.</p>
+        <button id="deleteAllData" class="danger-button" type="button">Delete all local health data</button>
+      </details>
     </details>
+
+    <aside id="backupReminder" class="backup-reminder" hidden>
+      <div>
+        <strong>Backup recommended</strong>
+        <p id="backupReminderText"></p>
+      </div>
+      <div class="backup-reminder-actions">
+        <button id="backupReminderLater" type="button">Later</button>
+        <button id="backupReminderExport" type="button">Export</button>
+      </div>
+    </aside>
 
     <section class="grid" aria-label="Quick log">
       <button class="card" data-form="daily">
@@ -124,6 +141,46 @@
         <button id="saveEntry" class="save-button" type="submit">Save entry</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog id="restoreDialog" class="safety-dialog">
+    <div class="safety-sheet">
+      <div class="safety-header">
+        <div>
+          <small>RESTORE BACKUP</small>
+          <h2>Review before replacing data</h2>
+        </div>
+        <button id="cancelRestoreTop" class="icon-button" type="button" aria-label="Close">×</button>
+      </div>
+      <div id="restorePreview"></div>
+      <div class="safety-actions safety-actions-stack">
+        <button id="backupBeforeRestore" type="button">Export current data first</button>
+        <button id="confirmRestore" class="primary-action" type="button">Restore backup</button>
+        <button id="cancelRestore" type="button">Cancel</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="deleteDataDialog" class="safety-dialog">
+    <div class="safety-sheet">
+      <div class="safety-header">
+        <div>
+          <small>LOCAL DATA</small>
+          <h2>Delete all health records?</h2>
+        </div>
+        <button id="cancelDeleteTop" class="icon-button" type="button" aria-label="Close">×</button>
+      </div>
+      <p>This permanently deletes HealthTracker records stored on this device. It does not delete CSV backups you previously exported.</p>
+      <label class="confirm-delete-field" for="deleteConfirmation">
+        Type <strong>DELETE</strong> to confirm
+        <input id="deleteConfirmation" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      </label>
+      <div class="safety-actions safety-actions-stack">
+        <button id="backupBeforeDelete" type="button">Export current data first</button>
+        <button id="confirmDeleteAll" class="danger-action" type="button" disabled>Delete all local data</button>
+        <button id="cancelDelete" type="button">Cancel</button>
+      </div>
+    </div>
   </dialog>
 
   <input id="restoreInput" type="file" accept=".csv,text/csv" hidden>
