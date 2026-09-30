@@ -5,7 +5,7 @@ import {
   prepareVoiceModel,
   transcribeVoiceAudio,
   voiceModelStatus
-} from "../voice/whisper.js";
+} from "../voice/whisper-upstream.js";
 
 const LABELS = {
   daily: "🌙 Sleep",
