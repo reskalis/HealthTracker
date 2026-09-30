@@ -4,11 +4,14 @@
 
 html {
   background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   min-height: 100vh;
   margin: 0;
+  overflow-x: hidden;
   background: var(--bg);
   color: var(--text);
 }
