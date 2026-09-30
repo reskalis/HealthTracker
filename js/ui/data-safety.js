@@ -72,7 +72,7 @@ export function renderRestorePreview(container, inspection, {
 }) {
   const counts = inspection.typeCounts;
   const typeSummary = [
-    ["Daily", counts.daily],
+    ["Sleep", counts.daily],
     ["Weight", counts.measurement],
     ["Blood pressure", counts.bp],
     ["Workouts", counts.workout]
