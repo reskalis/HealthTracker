@@ -208,12 +208,3 @@
   font-size: 12px;
   font-weight: 700;
 }
-
-
-.history-panel-empty .history-summary {
-  cursor: default;
-}
-
-.history-panel-empty .history-chevron {
-  display: none;
-}
