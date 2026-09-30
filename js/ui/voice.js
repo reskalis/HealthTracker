@@ -1,8 +1,32 @@
 import { parseVoiceTranscript, missingRequiredFields } from "../voice/parser.js";
 import { createVoiceRecorder } from "../voice/recorder.js";
+import {
+  VOICE_MODEL_SIZE_MB,
+  prepareVoiceModel,
+  transcribeVoiceAudio,
+  voiceModelStatus
+} from "../voice/whisper.js";
 
-const LABELS = { daily: "🌙 Sleep", measurement: "⚖️ Weight", bp: "❤️ Blood pressure", workout: "🏋️ Workout" };
-const FIELD_LABELS = { sleep_hours: "Sleep", sleep_quality: "Quality", energy: "Energy", weight_lb: "Weight", waist_in: "Waist", systolic: "Systolic", diastolic: "Diastolic", pulse: "Pulse", workout_type: "Type", duration_min: "Duration", intensity: "Intensity" };
+const LABELS = {
+  daily: "🌙 Sleep",
+  measurement: "⚖️ Weight",
+  bp: "❤️ Blood pressure",
+  workout: "🏋️ Workout"
+};
+
+const FIELD_LABELS = {
+  sleep_hours: "Sleep",
+  sleep_quality: "Quality",
+  energy: "Energy",
+  weight_lb: "Weight",
+  waist_in: "Waist",
+  systolic: "Systolic",
+  diastolic: "Diastolic",
+  pulse: "Pulse",
+  workout_type: "Type",
+  duration_min: "Duration",
+  intensity: "Intensity"
+};
 
 function valueLabel(name, value) {
   if (!value) return "—";
@@ -16,37 +40,86 @@ function valueLabel(name, value) {
 }
 
 function escapeHtml(value = "") {
-  return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function renderDraft(draft) {
   const missing = missingRequiredFields(draft);
   const rows = Object.entries(draft.fields)
     .filter(([, value]) => value !== "")
-    .map(([name, value]) => "<div><dt>" + escapeHtml(FIELD_LABELS[name] ?? name) + "</dt><dd>" + escapeHtml(valueLabel(name, value)) + "</dd></div>")
+    .map(([name, value]) =>
+      "<div><dt>" + escapeHtml(FIELD_LABELS[name] ?? name) +
+      "</dt><dd>" + escapeHtml(valueLabel(name, value)) + "</dd></div>"
+    )
     .join("");
 
-  return "<article class=\"voice-draft\"><strong>" + (LABELS[draft.type] ?? "Entry") + "</strong><dl>" +
-    (rows || "<div><dt>Detected fields</dt><dd>None yet</dd></div>") + "</dl>" +
+  return "<article class=\"voice-draft\"><strong>" +
+    (LABELS[draft.type] ?? "Entry") +
+    "</strong><dl>" +
+    (rows || "<div><dt>Detected fields</dt><dd>None yet</dd></div>") +
+    "</dl>" +
     (missing.length
-      ? "<p class=\"voice-warning\">Needs review: " + missing.map(name => escapeHtml(FIELD_LABELS[name] ?? name)).join(", ") + "</p>"
+      ? "<p class=\"voice-warning\">Needs review: " +
+        missing.map(name => escapeHtml(FIELD_LABELS[name] ?? name)).join(", ") +
+        "</p>"
       : "<p class=\"voice-ready\">Ready to save after review.</p>") +
     "</article>";
 }
 
 export function setupVoiceLab({
-  dialog, openButton, closeButton, transcriptInput, parseButton, results,
-  saveButton, recordButton, stopButton, audioEl, stateEl, onSaveDrafts
+  dialog,
+  openButton,
+  closeButton,
+  transcriptInput,
+  parseButton,
+  results,
+  saveButton,
+  recordButton,
+  stopButton,
+  audioEl,
+  stateEl,
+  installModelButton,
+  modelStatusEl,
+  modelProgressEl,
+  onSaveDrafts
 }) {
   if (!dialog || !openButton || !closeButton || !transcriptInput || !parseButton || !results) return;
 
   let drafts = [];
   let audioUrl = null;
+  let modelReady = false;
+  let busy = false;
 
-  const setState = text => { if (stateEl) stateEl.textContent = text; };
+  const setState = text => {
+    if (stateEl) stateEl.textContent = text;
+  };
+
+  const setModelStatus = text => {
+    if (modelStatusEl) modelStatusEl.textContent = text;
+  };
+
+  const setProgress = value => {
+    if (!modelProgressEl) return;
+    modelProgressEl.value = Math.max(0, Math.min(100, Number(value) || 0));
+  };
+
+  const updateControls = () => {
+    if (recordButton) recordButton.disabled = busy || !modelReady;
+    if (stopButton && !busy) stopButton.disabled = true;
+    if (installModelButton) installModelButton.disabled = busy || modelReady;
+  };
+
   const updateSave = () => {
     if (!saveButton) return;
-    saveButton.disabled = !drafts.length || drafts.some(draft => missingRequiredFields(draft).length);
+    saveButton.disabled =
+      busy ||
+      !drafts.length ||
+      drafts.some(draft => missingRequiredFields(draft).length);
   };
 
   const parse = () => {
@@ -57,48 +130,164 @@ export function setupVoiceLab({
     updateSave();
   };
 
+  const prepareModel = async () => {
+    busy = true;
+    updateControls();
+    updateSave();
+    try {
+      await prepareVoiceModel((progress, message) => {
+        setProgress(progress);
+        setModelStatus(message);
+      });
+      modelReady = true;
+      setProgress(100);
+      setModelStatus("Local Whisper model ready.");
+      setState("Ready. Tap Record and speak naturally.");
+    } catch (error) {
+      modelReady = false;
+      setModelStatus("Voice model could not be prepared.");
+      setState(error?.message || "Could not load the local voice model.");
+    } finally {
+      busy = false;
+      updateControls();
+      updateSave();
+    }
+  };
+
+  const checkModel = async () => {
+    busy = true;
+    updateControls();
+    try {
+      const status = await voiceModelStatus();
+      if (status.installed) {
+        setModelStatus("Local model found. Preparing…");
+        await prepareModel();
+      } else {
+        modelReady = false;
+        setProgress(0);
+        setModelStatus(
+          "Local Whisper model not installed. Download once (" +
+          VOICE_MODEL_SIZE_MB +
+          " MB) to enable offline transcription."
+        );
+        setState("Install the local model, then record.");
+      }
+    } catch (error) {
+      modelReady = false;
+      setModelStatus("Could not check local voice model.");
+      setState(error?.message || "Voice setup is unavailable in this browser.");
+    } finally {
+      busy = false;
+      updateControls();
+    }
+  };
+
   const recorder = createVoiceRecorder({
     onState: state => {
-      if (recordButton) recordButton.disabled = state === "recording";
-      if (stopButton) stopButton.disabled = state !== "recording";
-      if (state === "recording") setState("Recording locally…");
-      if (state === "ready") setState("Audio captured locally. Whisper transcription is the next integration step.");
+      if (state === "recording") {
+        busy = false;
+        if (recordButton) recordButton.disabled = true;
+        if (stopButton) stopButton.disabled = false;
+        setState("Recording locally…");
+      }
     },
-    onAudio: blob => {
-      if (!audioEl) return;
-      if (audioUrl) URL.revokeObjectURL(audioUrl);
-      audioUrl = URL.createObjectURL(blob);
-      audioEl.src = audioUrl;
-      audioEl.hidden = false;
+    onAudio: async blob => {
+      if (audioEl) {
+        if (audioUrl) URL.revokeObjectURL(audioUrl);
+        audioUrl = URL.createObjectURL(blob);
+        audioEl.src = audioUrl;
+        audioEl.hidden = false;
+      }
+
+      busy = true;
+      updateControls();
+      updateSave();
+
+      try {
+        const transcript = await transcribeVoiceAudio(blob, {
+          onProgress: (progress, message) => {
+            setProgress(progress);
+            setState(message);
+          }
+        });
+
+        transcriptInput.value = transcript;
+        if (transcript) {
+          parse();
+        } else {
+          drafts = [];
+          results.innerHTML = '<p class="voice-empty">Whisper did not detect speech. Try recording again.</p>';
+          updateSave();
+        }
+      } catch (error) {
+        drafts = [];
+        results.innerHTML = "";
+        setState(error?.message || "Local transcription failed.");
+        updateSave();
+      } finally {
+        busy = false;
+        updateControls();
+        updateSave();
+      }
     }
   });
 
   openButton.addEventListener("click", () => {
     dialog.showModal();
-    setState("Private voice test: audio stays on this device.");
-  });
-  closeButton.addEventListener("click", () => dialog.close());
-  dialog.addEventListener("cancel", event => { event.preventDefault(); dialog.close(); });
-  dialog.addEventListener("close", () => recorder.dispose());
-  parseButton.addEventListener("click", parse);
-  transcriptInput.addEventListener("input", () => {
-    if (!transcriptInput.value.trim()) { drafts = []; results.innerHTML = ""; updateSave(); }
+    setState("Checking local voice model…");
+    checkModel();
   });
 
-  recordButton?.addEventListener("click", async () => {
-    try { await recorder.start(); }
-    catch (error) { setState(error.message || "Could not access the microphone."); }
-  });
-  stopButton?.addEventListener("click", () => recorder.stop());
-  saveButton?.addEventListener("click", async () => {
-    if (saveButton.disabled || !onSaveDrafts) return;
-    saveButton.disabled = true;
-    await onSaveDrafts(drafts);
-    drafts = [];
-    transcriptInput.value = "";
-    results.innerHTML = "";
+  closeButton.addEventListener("click", () => dialog.close());
+
+  dialog.addEventListener("cancel", event => {
+    event.preventDefault();
     dialog.close();
   });
 
+  dialog.addEventListener("close", () => recorder.dispose());
+
+  installModelButton?.addEventListener("click", prepareModel);
+  parseButton.addEventListener("click", parse);
+
+  transcriptInput.addEventListener("input", () => {
+    if (!transcriptInput.value.trim()) {
+      drafts = [];
+      results.innerHTML = "";
+      updateSave();
+    }
+  });
+
+  recordButton?.addEventListener("click", async () => {
+    try {
+      await recorder.start();
+    } catch (error) {
+      setState(error?.message || "Could not access the microphone.");
+      busy = false;
+      updateControls();
+    }
+  });
+
+  stopButton?.addEventListener("click", () => recorder.stop());
+
+  saveButton?.addEventListener("click", async () => {
+    if (saveButton.disabled || !onSaveDrafts) return;
+
+    busy = true;
+    updateSave();
+
+    try {
+      await onSaveDrafts(drafts);
+      drafts = [];
+      transcriptInput.value = "";
+      results.innerHTML = "";
+      dialog.close();
+    } finally {
+      busy = false;
+      updateSave();
+    }
+  });
+
+  updateControls();
   updateSave();
 }
