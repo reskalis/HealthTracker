@@ -1,4 +1,4 @@
-const CACHE_VERSION = "0.9.1-20260930.21";
+const CACHE_VERSION = "0.9.1-20260930.22";
 const SHELL_CACHE = "healthtracker-shell-" + CACHE_VERSION;
 const RUNTIME_CACHE = "healthtracker-runtime-" + CACHE_VERSION;
 
@@ -38,7 +38,9 @@ const APP_SHELL = [
   "./js/voice/parser.js",
   "./js/voice/recorder.js",
   "./js/voice/whisper.js",
-  "./js/voice/whisper-worker.js"
+  "./js/voice/whisper-upstream.js",
+  "./js/voice/whisper-worker.js",
+  "./vendor/whisper-upstream/main.js"
 ];
 
 async function fetchFresh(request) {
