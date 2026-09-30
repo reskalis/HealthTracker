@@ -16,7 +16,7 @@ Health records are stored on the user's device in IndexedDB. There is no account
 - `js/config/version.js` — app/database/backup version metadata
 - `js/analytics/summary.js` — local descriptive trend calculations
 - `js/db/database.js` — IndexedDB persistence and migrations
-- `js/data/` — portable CSV serialization and export
+- `js/data/` — portable CSV serialization, strict backup inspection, restore validation, and export
 - `js/pwa/update.js` — service-worker registration and update UX
 - `js/ui/` — forms, dashboard, history, status, and presentation modules
 - `js/app.js` — application orchestration
@@ -27,7 +27,11 @@ Health records are stored on the user's device in IndexedDB. There is no account
 
 The working database is local to the browser/PWA. The portable backup is `healthtracker_backup.csv`.
 
-Restoring a backup is an explicit replacement operation. It does not merge silently with the current database.
+HealthTracker reminds the user to export when local records have no known backup or the last backup is at least 7 days old. The reminder can be snoozed for 24 hours and never transmits data.
+
+Restore is an explicit replacement operation. Before the database is touched, the entire CSV is inspected for malformed structure, duplicate IDs, invalid dates, unsupported record types, invalid required values, unsupported columns, mixed/future backup schemas, and other incompatible data. A restore preview shows the file, record count, date range, record-type counts, and how many current local records will be replaced.
+
+A deliberately buried **Data management** control allows all local health records to be deleted. Deletion requires typing `DELETE` and does not affect CSV backups previously exported outside the app.
 
 Browser/site data should never be the only long-term copy.
 
