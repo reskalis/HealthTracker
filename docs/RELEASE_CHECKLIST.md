@@ -9,6 +9,11 @@ Use this checklist before treating a deployment as ready for real health data.
 - Increment `BACKUP_SCHEMA_VERSION` only for portable CSV format changes.
 - Keep the service-worker cache release ID aligned with the build.
 
+## Automated checks
+- Confirm the GitHub Actions **Tests** workflow passes for the release commit.
+- Run `npm test` locally when developing changes to portable backups, validation, reminders, analytics, or trend calculations.
+- Treat a failing automated test as a release blocker until the failure is understood and resolved.
+
 ## Smoke test
 1. Open HealthTracker online.
 2. Confirm **Data & app status** shows the expected app, database, and backup versions.
