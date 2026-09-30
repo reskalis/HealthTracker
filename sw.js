@@ -1,13 +1,16 @@
-const CACHE_VERSION = "0.8.4-20260930.13";
+const CACHE_VERSION = "0.9.0-20260930.14";
 const SHELL_CACHE = "healthtracker-shell-" + CACHE_VERSION;
 const RUNTIME_CACHE = "healthtracker-runtime-" + CACHE_VERSION;
 
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./install.html",
   "./manifest.webmanifest",
   "./icons/healthtracker.svg",
+  "./icons/install-qr.svg",
   "./css/app.css",
+  "./css/install.css",
   "./css/variables.css",
   "./css/base.css",
   "./css/components.css",
@@ -28,7 +31,8 @@ const APP_SHELL = [
   "./js/ui/dashboard.js",
   "./js/ui/data-safety.js",
   "./js/ui/status.js",
-  "./js/ui/toast.js"
+  "./js/ui/toast.js",
+  "./js/ui/install.js"
 ];
 
 async function fetchFresh(request) {
