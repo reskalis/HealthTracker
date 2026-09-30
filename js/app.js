@@ -397,6 +397,8 @@ async function initialize() {
       installModelButton: $("#installVoiceModel"),
       modelStatusEl: $("#voiceModelStatus"),
       modelProgressEl: $("#voiceModelProgress"),
+      diagnosticsEl: $("#voiceDiagnostics"),
+      copyDiagnosticsButton: $("#copyVoiceDiagnostics"),
       onSaveDrafts: saveVoiceDrafts
     });
   }
