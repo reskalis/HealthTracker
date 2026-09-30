@@ -6,7 +6,7 @@ HealthTracker stores one record per health event. Every internal record has a UU
 
 HealthTracker versions three things independently:
 
-- App version: `0.4.0`
+- App version: `0.6.0`
 - IndexedDB schema version: `1`
 - CSV backup schema version: `2`
 
@@ -46,6 +46,22 @@ Columns:
 `backup_schema_version` and `app_version` are export metadata. They are not stored as health fields when a backup is restored.
 
 Older backups without these metadata columns remain importable. Backups made by a future unsupported schema are rejected rather than silently misread.
+
+## Restore validation
+
+A restore is validated completely before IndexedDB is modified. HealthTracker rejects backups with:
+
+- missing, duplicate, empty, or unsupported column names
+- malformed CSV quoting or inconsistent row lengths
+- missing or malformed date/time values
+- unknown record types
+- duplicate record IDs
+- missing required fields
+- non-numeric or out-of-range numeric fields
+- unsupported select values
+- invalid, mixed, or future backup schema versions
+
+Compatible legacy backups without stable IDs receive generated UUIDs during inspection. Restore remains an atomic replacement operation, so a failed validation cannot partially overwrite the current database.
 
 ## Database versioning
 
