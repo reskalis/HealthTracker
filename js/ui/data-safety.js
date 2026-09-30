@@ -1,5 +1,14 @@
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
 export const BACKUP_REMINDER_DAYS = 7;
 export const BACKUP_SNOOZE_HOURS = 24;
 
@@ -78,7 +87,7 @@ export function renderRestorePreview(container, inspection, {
 
   container.innerHTML = `
     <dl class="restore-preview-grid">
-      <div><dt>File</dt><dd>${fileName}</dd></div>
+      <div><dt>File</dt><dd>${escapeHtml(fileName)}</dd></div>
       <div><dt>Records</dt><dd>${inspection.recordCount}</dd></div>
       <div><dt>From</dt><dd>${formatDate(inspection.earliest)}</dd></div>
       <div><dt>Through</dt><dd>${formatDate(inspection.latest)}</dd></div>
