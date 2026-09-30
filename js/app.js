@@ -68,6 +68,7 @@ function refreshSystemStatus() {
     online
   });
 
+  $("#deleteAllData").disabled = entries.length === 0;
   refreshBackupReminder();
 }
 
