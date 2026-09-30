@@ -136,9 +136,14 @@ export async function transcribeVoiceAudio(blob, {
   diagnostics.audioWarnings = warnings ?? [];
   diagnostics.audio = audioStats(audioData);
 
-  const hardwareThreads = Number(navigator.hardwareConcurrency) || 2;
-  const threads = Math.max(1, Math.min(4, hardwareThreads));
+  // Diagnostic v0.9.1 build: force Whisper to one inference thread.
+  // The iPhone Safari test captured healthy audio but the pthread worker
+  // failed immediately. Keeping this global for the experiment makes the
+  // comparison clean; we can restore adaptive threading after compatibility
+  // is proven.
+  const threads = 1;
   diagnostics.threads = threads;
+  diagnostics.threadMode = "forced-single-thread";
 
   const runtimeWarnings = [];
   const originalWarn = console.warn;
