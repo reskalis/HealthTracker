@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090b0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HealthTracker">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/healthtracker.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/install.css">
+  <title>Install HealthTracker</title>
+</head>
+<body>
+  <header>
+    <div>
+      <small>PRIVATE • LOCAL</small>
+      <h1>HealthTracker</h1>
+    </div>
+    <div class="header-actions">
+      <a class="install-primary" href="./">Open app</a>
+    </div>
+  </header>
+
+  <main class="install-page">
+    <section class="install-hero">
+      <small>GET STARTED</small>
+      <h2>Put HealthTracker on your Home Screen.</h2>
+      <p>HealthTracker is a private, local-first health tracker that runs on your device. Installing it makes it feel and launch more like a normal app.</p>
+      <a class="install-primary" href="./">Open HealthTracker</a>
+    </section>
+
+    <div class="install-grid">
+      <section class="install-section">
+        <h3>iPhone & iPad</h3>
+        <ol>
+          <li>Open HealthTracker in <strong>Safari</strong>.</li>
+          <li>Tap the <strong>Share</strong> button.</li>
+          <li>Choose <strong>Add to Home Screen</strong>.</li>
+          <li>Confirm the name <strong>HealthTracker</strong>, then tap <strong>Add</strong>.</li>
+        </ol>
+      </section>
+
+      <section class="install-section">
+        <h3>Android</h3>
+        <ol>
+          <li>Open HealthTracker in <strong>Chrome</strong>.</li>
+          <li>Open Chrome's menu.</li>
+          <li>Choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
+          <li>Confirm the installation.</li>
+        </ol>
+      </section>
+    </div>
+
+    <section class="install-section install-qr">
+      <h3>Sharing in person?</h3>
+      <img src="icons/install-qr.svg" alt="QR code for the HealthTracker install page">
+      <p>Scan this code with a phone camera to open these instructions directly.</p>
+    </section>
+
+    <section class="install-section">
+      <h3>Before you start</h3>
+      <ul>
+        <li><strong>Your health records stay on this device</strong> unless you explicitly export them.</li>
+        <li>There is no HealthTracker account or cloud health-data backend.</li>
+        <li>Clearing browser or website data can remove locally stored records.</li>
+        <li><strong>Export a backup regularly.</strong> HealthTracker will remind you when a backup is due.</li>
+      </ul>
+    </section>
+
+    <details class="install-details">
+      <summary>Mac & Windows installation</summary>
+      <div>
+        <p>HealthTracker also works in modern desktop browsers. In Chrome or Edge, look for the browser's install option in the address bar or browser menu. You can also use HealthTracker normally in a browser tab without installing it.</p>
+      </div>
+    </details>
+
+    <section class="install-section">
+      <h3>Testing v0.9?</h3>
+      <p>If someone shared HealthTracker with you for feedback, the most useful things to report are anything that confused you, anything you expected to happen but didn't, and any part of installation, logging, backup, or restore that felt unclear.</p>
+    </section>
+
+    <p class="install-footer">HealthTracker stores health records locally in your browser or installed web app. Exported CSV backups are controlled by you.</p>
+  </main>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).catch(() => {});
+    }
+  </script>
+</body>
+</html>
