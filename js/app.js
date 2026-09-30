@@ -73,7 +73,15 @@ function refreshSystemStatus() {
 }
 
 function renderCurrentHistory() {
-  $("#historyCount").textContent = entries.length + (entries.length === 1 ? " record" : " records");
+  const historyPanel = document.querySelector(".history-panel");
+  const empty = entries.length === 0;
+
+  $("#historyCount").textContent = empty
+    ? "No records"
+    : entries.length + (entries.length === 1 ? " record" : " records");
+
+  historyPanel.classList.toggle("history-panel-empty", empty);
+  if (empty) historyPanel.open = false;
 
   renderHistory($("#history"), entries, FORM_CONFIG, {
     filter: historyFilter,
@@ -307,6 +315,10 @@ async function initialize() {
     historyFilter = event.target.value;
     historyLimit = 50;
     renderCurrentHistory();
+  });
+
+  $("#historySummary").addEventListener("click", event => {
+    if (entries.length === 0) event.preventDefault();
   });
 
   $("#close").addEventListener("click", () => {
