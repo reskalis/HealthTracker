@@ -86,6 +86,8 @@ export function setupVoiceLab({
   installModelButton,
   modelStatusEl,
   modelProgressEl,
+  diagnosticsEl,
+  copyDiagnosticsButton,
   onSaveDrafts
 }) {
   if (!dialog || !openButton || !closeButton || !transcriptInput || !parseButton || !results) return;
@@ -204,12 +206,16 @@ export function setupVoiceLab({
       updateSave();
 
       try {
-        const transcript = await transcribeVoiceAudio(blob, {
+        const { transcript, diagnostics } = await transcribeVoiceAudio(blob, {
           onProgress: (progress, message) => {
             setProgress(progress);
             setState(message);
           }
         });
+
+        if (diagnosticsEl) {
+          diagnosticsEl.textContent = JSON.stringify(diagnostics, null, 2);
+        }
 
         transcriptInput.value = transcript;
         if (transcript) {
@@ -269,6 +275,18 @@ export function setupVoiceLab({
   });
 
   stopButton?.addEventListener("click", () => recorder.stop());
+
+  copyDiagnosticsButton?.addEventListener("click", async () => {
+    const text = diagnosticsEl?.textContent?.trim();
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setState("Diagnostics copied.");
+    } catch {
+      setState("Could not copy diagnostics automatically. Select and copy them manually.");
+    }
+  });
 
   saveButton?.addEventListener("click", async () => {
     if (saveButton.disabled || !onSaveDrafts) return;
