@@ -20,6 +20,7 @@ import {
 import { showToast } from "./ui/toast.js";
 import { renderSystemStatus } from "./ui/status.js";
 import { registerPwaUpdates } from "./pwa/update.js";
+import { setupInstallPrompt } from "./ui/install.js";
 
 const $ = selector => document.querySelector(selector);
 const LAST_BACKUP_KEY = "healthtracker.lastBackup";
@@ -350,6 +351,11 @@ async function initialize() {
     weekday: "long",
     month: "long",
     day: "numeric"
+  });
+
+  setupInstallPrompt({
+    prompt: $("#installPrompt"),
+    dismissButton: $("#dismissInstallPrompt")
   });
 
   document.querySelectorAll("[data-form]").forEach(button => {
