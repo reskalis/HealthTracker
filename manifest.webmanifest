@@ -1,7 +1,7 @@
 {
   "id": "./",
   "name": "HealthTracker",
-  "short_name": "Health",
+  "short_name": "HealthTracker",
   "description": "Private, local-first personal health tracker.",
   "start_url": "./",
   "scope": "./",
