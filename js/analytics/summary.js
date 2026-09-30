@@ -1,4 +1,5 @@
 function asNumber(value) {
+  if (value === undefined || value === null || value === "") return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 }
@@ -23,20 +24,20 @@ function change(values) {
  * Returns an inclusive local-day window ending today.
  * The end is tomorrow at local midnight so future-dated records are excluded.
  */
-export function rangeBounds(days) {
-  const start = new Date();
+export function rangeBounds(days, now = new Date()) {
+  const start = new Date(now);
   start.setHours(0, 0, 0, 0);
   start.setDate(start.getDate() - (days - 1));
 
-  const end = new Date();
+  const end = new Date(now);
   end.setHours(0, 0, 0, 0);
   end.setDate(end.getDate() + 1);
 
   return { start, end };
 }
 
-export function entriesInRange(entries, days) {
-  const { start, end } = rangeBounds(days);
+export function entriesInRange(entries, days, now = new Date()) {
+  const { start, end } = rangeBounds(days, now);
 
   return entries.filter(entry => {
     const date = new Date(entry.datetime);
@@ -44,8 +45,8 @@ export function entriesInRange(entries, days) {
   });
 }
 
-export function summarize(entries, days) {
-  const range = entriesInRange(entries, days);
+export function summarize(entries, days, now = new Date()) {
+  const range = entriesInRange(entries, days, now);
   const measurements = range.filter(entry => entry.type === "measurement");
   const bloodPressure = range.filter(entry => entry.type === "bp");
   const workouts = range.filter(entry => entry.type === "workout");
@@ -92,8 +93,8 @@ export function summarize(entries, days) {
   };
 }
 
-export function buildTrendSeries(entries, days) {
-  const range = entriesInRange(entries, days);
+export function buildTrendSeries(entries, days, now = new Date()) {
+  const range = entriesInRange(entries, days, now);
 
   const sortByDate = items => [...items].sort(
     (a, b) => new Date(a.datetime) - new Date(b.datetime)
