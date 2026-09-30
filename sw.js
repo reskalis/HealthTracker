@@ -1,4 +1,4 @@
-const CACHE_VERSION = "0.6.1-20260930.3";
+const CACHE_VERSION = "0.6.0-20260930.2";
 const SHELL_CACHE = "healthtracker-shell-" + CACHE_VERSION;
 const RUNTIME_CACHE = "healthtracker-runtime-" + CACHE_VERSION;
 
