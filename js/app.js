@@ -115,13 +115,15 @@ function openForm(type, entry = null) {
   $("#fields").innerHTML = `
     <div class="field">
       <label for="entryDatetime">Date & time</label>
-      <input
-        id="entryDatetime"
-        name="datetime"
-        type="datetime-local"
-        value="${toLocalDateTimeInput(datetime)}"
-        required
-      >
+      <div class="datetime-field-shell">
+        <input
+          id="entryDatetime"
+          name="datetime"
+          type="datetime-local"
+          value="${toLocalDateTimeInput(datetime)}"
+          required
+        >
+      </div>
     </div>
   ` + renderFields(config.fields, entry ?? {});
 
