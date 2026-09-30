@@ -632,3 +632,51 @@ dialog::backdrop {
 .voice-model-card button:disabled {
   opacity: 0.5;
 }
+
+
+.voice-diagnostics {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--panel) 72%, transparent);
+  overflow: hidden;
+}
+
+.voice-diagnostics summary {
+  cursor: pointer;
+  padding: 12px 13px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.voice-diagnostics > p {
+  margin: 0;
+  border-top: 1px solid var(--line);
+  padding: 11px 13px 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.voice-diagnostics pre {
+  max-height: 220px;
+  margin: 10px 13px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.voice-diagnostics button {
+  min-height: 44px;
+  margin: 0 13px 13px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
