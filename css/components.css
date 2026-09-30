@@ -287,11 +287,38 @@ dialog::backdrop {
   border: 0;
 }
 
+.header-actions button:active,
 .card:active,
 .range-picker button:active,
 .history-entry-actions button:active,
-.show-older:active {
+.show-older:active,
+.backup-reminder-actions button:active,
+.safety-actions button:active,
+.danger-button:active,
+.icon-button:active,
+.save-button:active {
   opacity: 0.72;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .header-actions button:hover,
+  .card:hover,
+  .range-picker button:hover,
+  .history-entry > summary:hover,
+  .history-entry-actions button:hover,
+  .show-older:hover,
+  .backup-reminder-actions button:hover,
+  .safety-actions button:hover,
+  .danger-button:hover,
+  .icon-button:hover {
+    filter: brightness(1.12);
+  }
+
+  .status-panel > summary:hover,
+  .history-summary:hover,
+  .data-management > summary:hover {
+    background: color-mix(in srgb, var(--panel-2) 45%, transparent);
+  }
 }
 
 @media (max-width: 460px) {
