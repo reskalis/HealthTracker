@@ -270,7 +270,7 @@ export function renderDashboard(container, entries, days) {
     metricCard({
       title: "Activity",
       headline: `${stats.workoutCount} ${stats.workoutCount === 1 ? "workout" : "workouts"}`,
-      context: `${stats.workoutMinutes} min total`,
+      context: `${stats.workoutMinutes} min total · ${days}D range`,
       detail: stats.latestWorkoutType
         ? `Latest: ${stats.latestWorkoutType}`
         : "No workouts in this range",
