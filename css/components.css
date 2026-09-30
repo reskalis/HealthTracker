@@ -310,41 +310,50 @@ dialog::backdrop {
 }
 
 
+
+
 /*
- * Keep the native date/time picker, but let the parent own the visible width.
- * This avoids relying on device-specific pixel compensation for WebKit's
- * oversized datetime-local intrinsic width.
+ * HealthTracker owns the visible date/time field while the platform keeps
+ * control of the actual native date/time picker. This avoids device-specific
+ * sizing and alignment quirks in native temporal inputs.
  */
 .datetime-field-shell {
+  position: relative;
   width: 100%;
-  min-width: 0;
-  overflow: hidden;
+  min-height: 50px;
   border: 1px solid var(--line-strong);
   border-radius: 13px;
   background: var(--panel-2);
+  overflow: hidden;
 }
 
-.datetime-field-shell input[type="datetime-local"] {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: white;
+.datetime-field-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
   padding: 14px;
+  color: white;
   font-size: 17px;
+  line-height: 1.2;
+  text-align: center;
+  pointer-events: none;
 }
 
-
-/* Center the visible native date/time value without changing picker behavior. */
 .datetime-field-shell input[type="datetime-local"] {
-  text-align: center;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
-.datetime-field-shell input[type="datetime-local"]::-webkit-datetime-edit {
-  display: block;
-  width: 100%;
-  text-align: center;
+.datetime-field-shell:focus-within {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
