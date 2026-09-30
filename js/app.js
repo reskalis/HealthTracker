@@ -21,6 +21,8 @@ import { showToast } from "./ui/toast.js";
 import { renderSystemStatus } from "./ui/status.js";
 import { registerPwaUpdates } from "./pwa/update.js";
 import { setupInstallPrompt } from "./ui/install.js";
+import { applyVoiceExperimentFlag } from "./voice/feature.js";
+import { setupVoiceLab } from "./ui/voice.js";
 
 const $ = selector => document.querySelector(selector);
 const LAST_BACKUP_KEY = "healthtracker.lastBackup";
@@ -323,6 +325,24 @@ function setDashboardRange(days) {
   renderCurrentDashboard();
 }
 
+async function saveVoiceDrafts(drafts) {
+  const timestamp = new Date().toISOString();
+
+  for (const draft of drafts) {
+    await putEntry({
+      id: crypto.randomUUID(),
+      type: draft.type,
+      datetime: draft.datetime,
+      created_at: timestamp,
+      updated_at: timestamp,
+      ...draft.fields
+    });
+  }
+
+  await refresh();
+  showToast(drafts.length === 1 ? "Voice entry saved" : drafts.length + " voice entries saved");
+}
+
 async function initializePwa() {
   try {
     await registerPwaUpdates({
@@ -357,6 +377,26 @@ async function initialize() {
     prompt: $("#installPrompt"),
     dismissButton: $("#dismissInstallPrompt")
   });
+
+  const voiceEnabled = applyVoiceExperimentFlag();
+  $("#talk").hidden = !voiceEnabled;
+
+  if (voiceEnabled) {
+    setupVoiceLab({
+      dialog: $("#voiceDialog"),
+      openButton: $("#talk"),
+      closeButton: $("#closeVoice"),
+      transcriptInput: $("#voiceTranscript"),
+      parseButton: $("#parseVoiceTranscript"),
+      results: $("#voiceResults"),
+      saveButton: $("#saveVoiceDrafts"),
+      recordButton: $("#startVoiceRecording"),
+      stopButton: $("#stopVoiceRecording"),
+      audioEl: $("#voiceAudio"),
+      stateEl: $("#voiceState"),
+      onSaveDrafts: saveVoiceDrafts
+    });
+  }
 
   document.querySelectorAll("[data-form]").forEach(button => {
     button.addEventListener("click", () => openForm(button.dataset.form));
