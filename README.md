@@ -72,9 +72,9 @@ The install prompt dismissal is stored as non-health metadata in localStorage. I
 
 v0.9.1 includes a hidden, device-local voice experiment for private testing. It is disabled by default and can be enabled on one browser with `?voiceTest=1` and disabled with `?voiceTest=0`. The flag is stored in localStorage and is not authentication; the public source code still contains the experiment.
 
-The current prototype includes local microphone capture, a deterministic transcript parser for Sleep, Weight/Waist, Blood pressure/Pulse, and Workout phrases, review of detected records, and saving only after required fields are present. Audio is held in memory and is not uploaded by HealthTracker.
+The current prototype includes local microphone capture, local Whisper transcription through a vendored WASM runtime, a deterministic transcript parser for Sleep, Weight/Waist, Blood pressure/Pulse, and Workout phrases, review of detected records, and saving only after required fields are present. Audio and transcription are processed on-device and are not uploaded by HealthTracker.
 
-The Whisper WASM transcription runtime/model is intentionally not wired into this build yet. The transcript box exists as a parser test harness while the local speech runtime is integrated separately, so the experiment does not silently fall back to a cloud speech API.
+The browser runtime is vendored in `vendor/whisper-wasm/` and pinned to version 0.1.0. The English `base.en-q5_1` model (~57 MB) is downloaded from the upstream whisper.cpp model host only after the private tester explicitly requests it, then cached in a separate IndexedDB database named `WhisperModels`. Health records remain in HealthTracker's existing IndexedDB database.
 
 ## PWA update strategy
 
