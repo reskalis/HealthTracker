@@ -20,7 +20,7 @@ export const CSV_COLUMNS = [
   "app_version"
 ];
 
-const BACKUP_METADATA_COLUMNS = new Set([
+export const BACKUP_METADATA_COLUMNS = new Set([
   "backup_schema_version",
   "app_version"
 ]);
@@ -47,17 +47,22 @@ export function entriesToCsv(entries) {
   ].join("\n");
 }
 
-function parseCsv(text) {
+/**
+ * Parses CSV without interpreting HealthTracker semantics.
+ * Throws on malformed quoting so restore never silently guesses.
+ */
+export function parseCsvRows(text) {
+  const source = String(text ?? "").replace(/^\uFEFF/, "");
   const rows = [];
   let row = [];
   let field = "";
   let quoted = false;
 
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
+  for (let i = 0; i < source.length; i++) {
+    const char = source[i];
 
     if (quoted) {
-      if (char === '"' && text[i + 1] === '"') {
+      if (char === '"' && source[i + 1] === '"') {
         field += '"';
         i++;
       } else if (char === '"') {
@@ -65,7 +70,10 @@ function parseCsv(text) {
       } else {
         field += char;
       }
-    } else if (char === '"') {
+      continue;
+    }
+
+    if (char === '"') {
       quoted = true;
     } else if (char === ",") {
       row.push(field);
@@ -80,6 +88,10 @@ function parseCsv(text) {
     }
   }
 
+  if (quoted) {
+    throw new Error("Backup contains an unterminated quoted field.");
+  }
+
   if (field || row.length) {
     row.push(field.replace(/\r$/, ""));
     rows.push(row);
@@ -88,46 +100,11 @@ function parseCsv(text) {
   return rows;
 }
 
-export function csvToEntries(text) {
-  const rows = parseCsv(text);
-  if (!rows.length) return [];
-
-  const headers = rows.shift();
-  const missing = ["datetime", "type"].filter(column => !headers.includes(column));
-
-  if (missing.length) {
-    throw new Error("Backup is missing required columns: " + missing.join(", "));
-  }
-
-  const schemaIndex = headers.indexOf("backup_schema_version");
-
-  return rows
-    .filter(row => row.some(Boolean))
-    .map(row => {
-      if (schemaIndex >= 0 && row[schemaIndex]) {
-        const schemaVersion = Number(row[schemaIndex]);
-        if (Number.isFinite(schemaVersion) && schemaVersion > BACKUP_SCHEMA_VERSION) {
-          throw new Error(
-            `This backup uses schema v${schemaVersion}, but this app supports up to v${BACKUP_SCHEMA_VERSION}.`
-          );
-        }
-      }
-
-      const entry = {};
-
-      headers.forEach((header, index) => {
-        if (
-          row[index] !== undefined &&
-          row[index] !== "" &&
-          !BACKUP_METADATA_COLUMNS.has(header)
-        ) {
-          entry[header] = row[index];
-        }
-      });
-
-      entry.id ||= crypto.randomUUID();
-      entry.created_at ||= entry.datetime;
-      entry.updated_at ||= new Date().toISOString();
-      return entry;
-    });
+/**
+ * Backward-compatible entry-only parser.
+ * New restore flows should use inspectBackup() from backup.js.
+ */
+export async function csvToEntries(text) {
+  const { inspectBackup } = await import("./backup.js");
+  return inspectBackup(text).entries;
 }
