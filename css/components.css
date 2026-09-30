@@ -336,3 +336,15 @@ dialog::backdrop {
   padding: 14px;
   font-size: 17px;
 }
+
+
+/* Center the visible native date/time value without changing picker behavior. */
+.datetime-field-shell input[type="datetime-local"] {
+  text-align: center;
+}
+
+.datetime-field-shell input[type="datetime-local"]::-webkit-datetime-edit {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
