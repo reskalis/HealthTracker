@@ -49,6 +49,29 @@ function toLocalDateTimeInput(isoString) {
   ].join(":");
 }
 
+function formatDateTimeDisplay(localDateTime) {
+  if (!localDateTime) return "Choose date & time";
+
+  const date = new Date(localDateTime);
+  if (Number.isNaN(date.getTime())) return "Choose date & time";
+
+  return date.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).replace(",", " at");
+}
+
+function syncDateTimeDisplay() {
+  const input = $("#entryDatetime");
+  const display = $("#entryDatetimeDisplay");
+  if (!input || !display) return;
+
+  display.textContent = formatDateTimeDisplay(input.value);
+}
+
 function refreshBackupReminder() {
   const state = getBackupReminderState({
     recordCount: entries.length,
@@ -116,6 +139,7 @@ function openForm(type, entry = null) {
     <div class="field">
       <label for="entryDatetime">Date & time</label>
       <div class="datetime-field-shell">
+        <span id="entryDatetimeDisplay" class="datetime-field-display" aria-hidden="true"></span>
         <input
           id="entryDatetime"
           name="datetime"
@@ -128,6 +152,11 @@ function openForm(type, entry = null) {
   ` + renderFields(config.fields, entry ?? {});
 
   $("#modal").showModal();
+
+  const datetimeInput = $("#entryDatetime");
+  datetimeInput.addEventListener("input", syncDateTimeDisplay);
+  datetimeInput.addEventListener("change", syncDateTimeDisplay);
+  syncDateTimeDisplay();
 }
 
 async function handleSubmit(event) {
