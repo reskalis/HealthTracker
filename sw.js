@@ -1,4 +1,4 @@
-const CACHE_VERSION = "0.9.1-20260930.16";
+const CACHE_VERSION = "0.9.1-20260930.17";
 const SHELL_CACHE = "healthtracker-shell-" + CACHE_VERSION;
 const RUNTIME_CACHE = "healthtracker-runtime-" + CACHE_VERSION;
 
@@ -56,6 +56,20 @@ async function precacheShell() {
       await cache.put(url, response);
     })
   );
+}
+
+function withCrossOriginIsolation(response) {
+  if (!response || response.type === "opaque") return response;
+
+  const headers = new Headers(response.headers);
+  headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  headers.set("Cross-Origin-Embedder-Policy", "require-corp");
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
 }
 
 async function networkFirst(request, fallbackUrl = null) {
@@ -117,7 +131,9 @@ self.addEventListener("fetch", event => {
   if (request.method !== "GET" || url.origin !== self.location.origin) return;
 
   if (request.mode === "navigate") {
-    event.respondWith(networkFirst(request, "./index.html"));
+    event.respondWith(
+      networkFirst(request, "./index.html").then(withCrossOriginIsolation)
+    );
     return;
   }
 
