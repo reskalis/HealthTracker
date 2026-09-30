@@ -11,6 +11,7 @@ Health records are stored on the user's device in IndexedDB. There is no account
 ## Architecture
 
 - `index.html` — semantic application shell
+- `install.html` — mobile-first installation and onboarding guide
 - `css/` — design tokens, base styles, and components
 - `js/config/forms.js` — declarative field definitions and validation
 - `js/config/version.js` — app/database/backup version metadata
@@ -60,6 +61,12 @@ Trend summaries are calculated entirely on-device from IndexedDB records. Health
 - Chart points can be tapped to inspect the specific value and timestamp.
 
 History is collapsed by default, filterable by record type, grouped by date, and rendered as compact expandable rows. Edit/Delete controls and secondary details only appear after expanding an entry. The first 50 matching records render initially, with older records available on demand. Editing preserves the record UUID and original creation timestamp while updating the health fields, event date/time, and `updated_at` timestamp.
+
+## Installation and onboarding
+
+The main app shows a lightweight, dismissible install suggestion when HealthTracker is running in a browser rather than standalone mode. The suggestion links to `install.html`, which prioritizes iPhone/iPad and Android installation steps, includes desktop guidance, explains local-data/backup expectations, and provides a QR code for in-person sharing.
+
+The install prompt dismissal is stored as non-health metadata in localStorage. Installed/standalone sessions suppress the prompt automatically.
 
 ## PWA update strategy
 
