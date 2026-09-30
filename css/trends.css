@@ -20,7 +20,8 @@
 }
 
 .range-picker button {
-  min-width: 34px;
+  min-width: 44px;
+  min-height: 44px;
   border: 0;
   border-radius: 9px;
   background: transparent;
@@ -57,6 +58,7 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .metric-title {
