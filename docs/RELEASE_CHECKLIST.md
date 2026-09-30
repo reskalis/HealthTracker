@@ -37,6 +37,15 @@ Use this checklist before treating a deployment as ready for real health data.
 20. Put the device offline, reopen HealthTracker, and confirm the app loads and records remain available.
 21. Return online and verify the network status updates.
 
+## Onboarding test
+1. Open HealthTracker in a normal browser tab with no install-prompt dismissal stored.
+2. Confirm the **Install HealthTracker** suggestion appears and **How to install** opens `install.html`.
+3. Confirm dismissing the suggestion keeps it hidden on later browser launches.
+4. Confirm the suggestion is hidden when HealthTracker is running in standalone/installed mode.
+5. Check the install page on a phone-sized viewport and confirm iPhone/iPad and Android instructions are easy to scan.
+6. Scan the install-page QR code with a phone and confirm it resolves to the HealthTracker install page.
+7. Confirm **Open HealthTracker** returns to the main app.
+
 ## Update test
 1. Deploy a build with a new build ID and service-worker cache release ID.
 2. Reopen or focus the previously installed app.
