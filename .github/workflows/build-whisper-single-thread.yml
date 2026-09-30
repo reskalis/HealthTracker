@@ -1,0 +1,57 @@
+name: Build iOS-safe Whisper WASM
+
+on:
+  push:
+    paths:
+      - ".github/workflows/build-whisper-single-thread.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build non-pthread Whisper browser runtime
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/whisper.cpp /tmp/whisper-build
+          git clone --depth 1 --branch v1.7.6 https://github.com/ggml-org/whisper.cpp.git /tmp/whisper.cpp
+
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("/tmp/whisper.cpp/examples/whisper.wasm/CMakeLists.txt")
+          s = p.read_text()
+          s = s.replace('    -s USE_PTHREADS=1 \\\n', '')
+          s = s.replace('    -s PTHREAD_POOL_SIZE_STRICT=0 \\\n', '')
+          p.write_text(s)
+          PY
+
+          docker run --rm             -v /tmp/whisper.cpp:/src/whisper.cpp             -w /src/whisper.cpp             emscripten/emsdk:4.0.14             bash -lc '
+              set -euo pipefail
+              rm -rf build-em
+              mkdir build-em
+              cd build-em
+              emcmake cmake ..                 -DWHISPER_WASM_SINGLE_FILE=ON                 -DCMAKE_EXE_LINKER_FLAGS="-sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=web"
+              cmake --build . -j2 --target libmain
+            '
+
+          test -f /tmp/whisper.cpp/build-em/bin/libmain.js
+          cp /tmp/whisper.cpp/build-em/bin/libmain.js vendor/whisper-wasm/libmain-D9-QM3iM.mjs
+          printf '%s\n' 'whisper.cpp v1.7.6 · Emscripten 4.0.14 · no pthreads' > vendor/whisper-wasm/RUNTIME_BUILD.txt
+
+      - name: Commit iOS-safe runtime
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vendor/whisper-wasm/libmain-D9-QM3iM.mjs vendor/whisper-wasm/RUNTIME_BUILD.txt
+          if git diff --cached --quiet; then
+            echo "Runtime already matches requested build."
+            exit 0
+          fi
+          git commit -m "Build Whisper WASM without pthreads [skip ci]"
+          git push
