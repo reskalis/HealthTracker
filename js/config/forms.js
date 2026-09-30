@@ -1,6 +1,6 @@
 export const FORM_CONFIG = {
   daily: {
-    title: "Daily check-in",
+    title: "Sleep",
     fields: [
       { name: "sleep_hours", label: "Sleep (hours)", type: "number", inputMode: "decimal", step: 0.1, min: 0, max: 24, required: true },
       { name: "sleep_quality", label: "Sleep quality", type: "select", required: true, options: [
@@ -15,7 +15,7 @@ export const FORM_CONFIG = {
     ]
   },
   measurement: {
-    title: "Weight & waist",
+    title: "Weight",
     fields: [
       { name: "weight_lb", label: "Weight (lb)", type: "number", inputMode: "decimal", step: 0.1, min: 1, max: 1500, required: true },
       { name: "waist_in", label: "Waist (in, optional)", type: "number", inputMode: "decimal", step: 0.1, min: 1, max: 150, required: false }
