@@ -308,3 +308,31 @@ dialog::backdrop {
     align-items: center;
   }
 }
+
+
+/*
+ * Keep the native date/time picker, but let the parent own the visible width.
+ * This avoids relying on device-specific pixel compensation for WebKit's
+ * oversized datetime-local intrinsic width.
+ */
+.datetime-field-shell {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: var(--panel-2);
+}
+
+.datetime-field-shell input[type="datetime-local"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: white;
+  padding: 14px;
+  font-size: 17px;
+}
