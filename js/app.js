@@ -3,19 +3,27 @@ import {
   getEntries,
   putEntry,
   deleteEntry,
+  clearEntries,
   replaceEntries,
   migrateLegacyLocalStorage
 } from "./db/database.js";
 import { exportBackup } from "./data/export.js";
-import { csvToEntries } from "./data/csv.js";
+import { inspectBackup } from "./data/backup.js";
 import { renderFields } from "./ui/forms.js";
 import { renderHistory } from "./ui/history.js";
 import { renderDashboard } from "./ui/dashboard.js";
+import {
+  getBackupReminderState,
+  snoozeUntil,
+  renderRestorePreview
+} from "./ui/data-safety.js";
 import { showToast } from "./ui/toast.js";
 import { renderSystemStatus } from "./ui/status.js";
 import { registerPwaUpdates } from "./pwa/update.js";
 
 const $ = selector => document.querySelector(selector);
+const LAST_BACKUP_KEY = "healthtracker.lastBackup";
+const BACKUP_SNOOZE_KEY = "healthtracker.backupReminderDismissedUntil";
 
 let entries = [];
 let activeForm = null;
@@ -25,6 +33,7 @@ let historyLimit = 50;
 let dashboardRange = 30;
 let offlineReady = false;
 let online = navigator.onLine;
+let pendingRestore = null;
 
 function toLocalDateTimeInput(isoString) {
   const date = new Date(isoString);
@@ -40,13 +49,26 @@ function toLocalDateTimeInput(isoString) {
   ].join(":");
 }
 
+function refreshBackupReminder() {
+  const state = getBackupReminderState({
+    recordCount: entries.length,
+    lastBackup: localStorage.getItem(LAST_BACKUP_KEY),
+    dismissedUntil: localStorage.getItem(BACKUP_SNOOZE_KEY)
+  });
+
+  $("#backupReminder").hidden = !state.show;
+  $("#backupReminderText").textContent = state.message ?? "";
+}
+
 function refreshSystemStatus() {
   renderSystemStatus({
     recordCount: entries.length,
-    lastBackup: localStorage.getItem("healthtracker.lastBackup"),
+    lastBackup: localStorage.getItem(LAST_BACKUP_KEY),
     offlineReady,
     online
   });
+
+  refreshBackupReminder();
 }
 
 function renderCurrentHistory() {
@@ -148,30 +170,37 @@ async function handleDelete(id) {
 }
 
 async function handleExport() {
-  if (!(await exportBackup(entries))) return;
+  if (!(await exportBackup(entries))) return false;
 
-  localStorage.setItem("healthtracker.lastBackup", new Date().toISOString());
+  localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
+  localStorage.removeItem(BACKUP_SNOOZE_KEY);
   refreshSystemStatus();
   showToast("Backup exported");
+  return true;
 }
 
-async function handleRestore(event) {
+function closeRestoreDialog() {
+  pendingRestore = null;
+  $("#restoreDialog").close();
+}
+
+async function handleRestoreFile(event) {
   const file = event.target.files?.[0];
   if (!file) return;
 
   try {
-    const imported = csvToEntries(await file.text());
+    const inspection = inspectBackup(await file.text());
+    pendingRestore = {
+      inspection,
+      fileName: file.name
+    };
 
-    const confirmed = confirm(
-      "Restore " + imported.length + " records from this backup? " +
-      "This will replace the records currently stored on this device."
-    );
+    renderRestorePreview($("#restorePreview"), inspection, {
+      fileName: file.name,
+      currentRecordCount: entries.length
+    });
 
-    if (!confirmed) return;
-
-    await replaceEntries(imported);
-    await refresh();
-    showToast("Restored " + imported.length + " records");
+    $("#restoreDialog").showModal();
   } catch (error) {
     alert("Could not restore backup: " + error.message);
   } finally {
@@ -179,11 +208,53 @@ async function handleRestore(event) {
   }
 }
 
+async function confirmRestore() {
+  if (!pendingRestore) return;
+
+  const inspection = pendingRestore.inspection;
+  await replaceEntries(inspection.entries);
+
+  // The restored records came from an external backup file, so the current
+  // dataset has a known portable copy at the time of restore.
+  localStorage.setItem(LAST_BACKUP_KEY, new Date().toISOString());
+  localStorage.removeItem(BACKUP_SNOOZE_KEY);
+
+  closeRestoreDialog();
+  await refresh();
+  showToast("Restored " + inspection.recordCount + " records");
+}
+
+function openDeleteAllDialog() {
+  $("#deleteConfirmation").value = "";
+  $("#confirmDeleteAll").disabled = true;
+  $("#deleteDataDialog").showModal();
+}
+
+function closeDeleteAllDialog() {
+  $("#deleteConfirmation").value = "";
+  $("#confirmDeleteAll").disabled = true;
+  $("#deleteDataDialog").close();
+}
+
+async function confirmDeleteAll() {
+  if ($("#deleteConfirmation").value.trim() !== "DELETE") return;
+
+  await clearEntries();
+  localStorage.removeItem(LAST_BACKUP_KEY);
+  localStorage.removeItem(BACKUP_SNOOZE_KEY);
+
+  closeDeleteAllDialog();
+  await refresh();
+  showToast("Local health data deleted");
+}
+
 function setDashboardRange(days) {
   dashboardRange = days;
 
   document.querySelectorAll("[data-range]").forEach(button => {
-    button.classList.toggle("active", Number(button.dataset.range) === days);
+    const selected = Number(button.dataset.range) === days;
+    button.classList.toggle("active", selected);
+    button.setAttribute("aria-pressed", String(selected));
   });
 
   renderCurrentDashboard();
@@ -224,6 +295,10 @@ async function initialize() {
   });
 
   document.querySelectorAll("[data-range]").forEach(button => {
+    button.setAttribute(
+      "aria-pressed",
+      String(Number(button.dataset.range) === dashboardRange)
+    );
     button.addEventListener("click", () => setDashboardRange(Number(button.dataset.range)));
   });
 
@@ -241,7 +316,27 @@ async function initialize() {
   $("#entryForm").addEventListener("submit", handleSubmit);
   $("#backup").addEventListener("click", handleExport);
   $("#restore").addEventListener("click", () => $("#restoreInput").click());
-  $("#restoreInput").addEventListener("change", handleRestore);
+  $("#restoreInput").addEventListener("change", handleRestoreFile);
+
+  $("#backupReminderExport").addEventListener("click", handleExport);
+  $("#backupReminderLater").addEventListener("click", () => {
+    localStorage.setItem(BACKUP_SNOOZE_KEY, snoozeUntil());
+    refreshBackupReminder();
+  });
+
+  $("#cancelRestore").addEventListener("click", closeRestoreDialog);
+  $("#cancelRestoreTop").addEventListener("click", closeRestoreDialog);
+  $("#confirmRestore").addEventListener("click", confirmRestore);
+  $("#backupBeforeRestore").addEventListener("click", handleExport);
+
+  $("#deleteAllData").addEventListener("click", openDeleteAllDialog);
+  $("#cancelDelete").addEventListener("click", closeDeleteAllDialog);
+  $("#cancelDeleteTop").addEventListener("click", closeDeleteAllDialog);
+  $("#backupBeforeDelete").addEventListener("click", handleExport);
+  $("#deleteConfirmation").addEventListener("input", event => {
+    $("#confirmDeleteAll").disabled = event.target.value.trim() !== "DELETE";
+  });
+  $("#confirmDeleteAll").addEventListener("click", confirmDeleteAll);
 
   await refresh();
   if (migrated) showToast("Migrated " + migrated + " existing entries");
