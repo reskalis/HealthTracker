@@ -18,9 +18,23 @@ function firstNumber(text, pattern) {
 }
 
 function mapThreeLevel(text, word) {
-  const match = text.match(new RegExp("\\b(low|medium|high)\\s+" + word + "\\b", "i"));
+  const aliases = {
+    low: "2",
+    poor: "2",
+    bad: "2",
+    medium: "3",
+    average: "3",
+    okay: "3",
+    ok: "3",
+    high: "4",
+    good: "4"
+  };
+
+  const match = text.match(
+    new RegExp("\\b(low|poor|bad|medium|average|okay|ok|high|good)\\s+" + word + "\\b", "i")
+  );
   if (!match) return null;
-  return ({ low: "2", medium: "3", high: "4" })[match[1].toLowerCase()];
+  return aliases[match[1].toLowerCase()];
 }
 
 function workoutType(text) {
@@ -33,10 +47,22 @@ function workoutType(text) {
 }
 
 function intensity(text) {
-  const match = text.match(/\b(easy|moderate|hard|very hard)\s+(?:intensity|workout|session)?\b/i);
+  const match = text.match(
+    /\b(very\s+high|very\s+hard|high|hard|medium|moderate|low|easy)\s+(?:intensity|workout|session)?\b/i
+  );
   if (!match) return null;
-  const value = match[1].toLowerCase();
-  return ({ easy: "Easy", moderate: "Moderate", hard: "Hard", "very hard": "Very Hard" })[value];
+
+  const value = match[1].toLowerCase().replace(/\s+/g, " ");
+  return ({
+    low: "Easy",
+    easy: "Easy",
+    medium: "Moderate",
+    moderate: "Moderate",
+    high: "Hard",
+    hard: "Hard",
+    "very high": "Very Hard",
+    "very hard": "Very Hard"
+  })[value];
 }
 
 function durationMinutes(text) {
