@@ -1,0 +1,137 @@
+.install-page {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 16px calc(56px + env(safe-area-inset-bottom));
+}
+
+.install-hero {
+  padding: 28px 4px 18px;
+}
+
+.install-hero h2 {
+  margin: 7px 0 10px;
+  font-size: clamp(30px, 7vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.install-hero p {
+  max-width: 580px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.install-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: 18px;
+  border: 1px solid color-mix(in srgb, var(--success) 68%, var(--line));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--panel-2) 82%, var(--panel));
+  color: var(--text);
+  padding: 12px 18px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.install-section {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+  padding: 18px;
+}
+
+.install-section h3 {
+  margin: 0 0 12px;
+  font-size: 19px;
+}
+
+.install-section p,
+.install-section li {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.install-section ol,
+.install-section ul {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.install-section li + li {
+  margin-top: 8px;
+}
+
+.install-section strong {
+  color: var(--text);
+}
+
+.install-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.install-qr {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.install-qr img {
+  width: min(210px, 58vw);
+  height: auto;
+  border-radius: 16px;
+  background: #fff;
+  padding: 12px;
+}
+
+.install-qr p {
+  max-width: 360px;
+  margin: 12px auto 0;
+}
+
+.install-details {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--panel) 62%, transparent);
+  overflow: hidden;
+}
+
+.install-details summary {
+  cursor: pointer;
+  padding: 14px 16px;
+  font-weight: 700;
+}
+
+.install-details > div {
+  border-top: 1px solid var(--line);
+  padding: 0 16px 16px;
+}
+
+.install-footer {
+  margin-top: 22px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@media (min-width: 680px) {
+  .install-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .install-primary:hover {
+    border-color: var(--success);
+    filter: brightness(1.08);
+  }
+}
