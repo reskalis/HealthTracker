@@ -184,8 +184,8 @@ header {
 dialog {
   width: 100%;
   max-width: 680px;
-  height: 100dvh;
-  max-height: 100dvh;
+  height: 100%;
+  max-height: none;
   border: 0;
   background: transparent;
   padding: 0;
@@ -199,9 +199,7 @@ dialog::backdrop {
   position: absolute;
   bottom: 0;
   width: 100%;
-  max-width: 100%;
-  max-height: min(92vh, 92dvh);
-  overflow-x: hidden;
+  max-height: 92vh;
   overflow-y: auto;
   border-radius: 24px 24px 0 0;
   background: var(--panel-3);
@@ -220,12 +218,6 @@ dialog::backdrop {
   font-size: 30px;
 }
 
-#entryForm,
-#fields,
-.field {
-  min-width: 0;
-}
-
 .field {
   margin: 14px 0;
 }
@@ -241,8 +233,6 @@ dialog::backdrop {
 .field select,
 .field textarea {
   width: 100%;
-  min-width: 0;
-  max-width: 100%;
   border: 1px solid var(--line-strong);
   border-radius: 13px;
   background: var(--panel-2);
@@ -317,13 +307,4 @@ dialog::backdrop {
   .section-heading {
     align-items: center;
   }
-}
-
-
-.field input[type="datetime-local"] {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
 }
