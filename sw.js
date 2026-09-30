@@ -1,4 +1,4 @@
-const CACHE_VERSION = "0.9.0-20260930.14";
+const CACHE_VERSION = "0.9.1-20260930.15";
 const SHELL_CACHE = "healthtracker-shell-" + CACHE_VERSION;
 const RUNTIME_CACHE = "healthtracker-runtime-" + CACHE_VERSION;
 
@@ -32,7 +32,11 @@ const APP_SHELL = [
   "./js/ui/data-safety.js",
   "./js/ui/status.js",
   "./js/ui/toast.js",
-  "./js/ui/install.js"
+  "./js/ui/install.js",
+  "./js/ui/voice.js",
+  "./js/voice/feature.js",
+  "./js/voice/parser.js",
+  "./js/voice/recorder.js"
 ];
 
 async function fetchFresh(request) {
