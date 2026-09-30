@@ -47,25 +47,22 @@ header {
 }
 
 .hero {
-  padding: 22px 20px 16px;
+  padding: 10px 20px 18px;
 }
 
 .hero p {
-  margin: 4px 0;
+  margin: 0;
   color: var(--muted);
-}
-
-.hero h2 {
-  margin: 7px 0;
-  font-size: 32px;
+  font-size: 14px;
 }
 
 .status-panel {
-  margin: 0 16px 18px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: var(--panel);
+  margin: 8px 16px 100px;
+  border: 1px solid color-mix(in srgb, var(--line) 72%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--panel) 38%, transparent);
   overflow: hidden;
+  color: var(--muted);
 }
 
 .status-panel summary {
@@ -75,7 +72,8 @@ header {
   gap: 12px;
   padding: 14px 16px;
   cursor: pointer;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 600;
   list-style: none;
 }
 
@@ -105,14 +103,14 @@ header {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1px;
-  background: var(--line);
+  background: color-mix(in srgb, var(--line) 72%, transparent);
 }
 
 .status-grid > div {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: var(--panel);
+  background: color-mix(in srgb, var(--panel) 55%, var(--bg));
   padding: 13px 16px;
 }
 
