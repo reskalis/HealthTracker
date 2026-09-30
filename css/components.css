@@ -465,3 +465,128 @@ dialog::backdrop {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }
+
+
+/* Private v0.9.1 voice experiment */
+.talk-button {
+  border: 1px solid color-mix(in srgb, var(--success) 58%, var(--line)) !important;
+  background: color-mix(in srgb, var(--panel-2) 82%, var(--panel)) !important;
+}
+
+.voice-privacy,
+.voice-state,
+.voice-transcript-label span,
+.voice-empty {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.voice-record-controls,
+.voice-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.voice-record-controls button,
+.voice-actions button {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.voice-record-controls button:disabled {
+  opacity: 0.45;
+}
+
+.voice-state {
+  margin: 10px 0;
+}
+
+#voiceAudio {
+  width: 100%;
+  margin: 2px 0 14px;
+}
+
+.voice-transcript-label {
+  display: grid;
+  gap: 4px;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#voiceTranscript {
+  width: 100%;
+  margin-top: 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: var(--panel-2);
+  color: var(--text);
+  padding: 13px;
+  font-size: 16px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.voice-results {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.voice-draft {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  padding: 13px;
+}
+
+.voice-draft > strong {
+  font-size: 14px;
+}
+
+.voice-draft dl {
+  margin: 9px 0 0;
+}
+
+.voice-draft dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 4px 0;
+}
+
+.voice-draft dt,
+.voice-draft dd {
+  margin: 0;
+  font-size: 12px;
+}
+
+.voice-draft dt {
+  color: var(--muted);
+}
+
+.voice-draft dd {
+  text-align: right;
+}
+
+.voice-warning,
+.voice-ready {
+  margin: 10px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.voice-warning {
+  color: var(--warning);
+}
+
+.voice-ready {
+  color: var(--success);
+}
