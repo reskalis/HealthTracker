@@ -95,7 +95,15 @@ function refreshSystemStatus() {
 }
 
 function renderCurrentHistory() {
-  $("#historyCount").textContent = entries.length + (entries.length === 1 ? " record" : " records");
+  const historyPanel = document.querySelector(".history-panel");
+  const empty = entries.length === 0;
+
+  $("#historyCount").textContent = empty
+    ? "No records"
+    : entries.length + (entries.length === 1 ? " record" : " records");
+
+  historyPanel.classList.toggle("history-panel-empty", empty);
+  if (empty) historyPanel.open = false;
 
   renderHistory($("#history"), entries, FORM_CONFIG, {
     filter: historyFilter,
@@ -339,6 +347,10 @@ async function initialize() {
     renderCurrentHistory();
   });
 
+  $("#historySummary").addEventListener("click", event => {
+    if (entries.length === 0) event.preventDefault();
+  });
+
   $("#close").addEventListener("click", () => {
     activeEntryId = null;
     $("#modal").close();
@@ -357,12 +369,20 @@ async function initialize() {
 
   $("#cancelRestore").addEventListener("click", closeRestoreDialog);
   $("#cancelRestoreTop").addEventListener("click", closeRestoreDialog);
+  $("#restoreDialog").addEventListener("cancel", event => {
+    event.preventDefault();
+    closeRestoreDialog();
+  });
   $("#confirmRestore").addEventListener("click", confirmRestore);
   $("#backupBeforeRestore").addEventListener("click", handleExport);
 
   $("#deleteAllData").addEventListener("click", openDeleteAllDialog);
   $("#cancelDelete").addEventListener("click", closeDeleteAllDialog);
   $("#cancelDeleteTop").addEventListener("click", closeDeleteAllDialog);
+  $("#deleteDataDialog").addEventListener("cancel", event => {
+    event.preventDefault();
+    closeDeleteAllDialog();
+  });
   $("#backupBeforeDelete").addEventListener("click", handleExport);
   $("#deleteConfirmation").addEventListener("input", event => {
     $("#confirmDeleteAll").disabled = event.target.value.trim() !== "DELETE";
