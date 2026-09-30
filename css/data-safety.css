@@ -33,6 +33,7 @@
 }
 
 .backup-reminder-actions button {
+  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--panel-2);
@@ -64,6 +65,7 @@
 }
 
 .danger-button {
+  min-height: 44px;
   border: 1px solid #5a2d31;
   border-radius: 11px;
   background: #251416;
@@ -116,6 +118,8 @@
 }
 
 .icon-button {
+  min-width: 44px;
+  min-height: 44px;
   border: 0;
   background: transparent;
   color: var(--muted);
@@ -191,6 +195,7 @@
 
 .safety-actions button {
   width: 100%;
+  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel-2);
@@ -238,7 +243,7 @@
   font-size: 16px;
 }
 
-@media (max-width: 390px) {
+@media (max-width: 460px) {
   .backup-reminder {
     align-items: flex-start;
     flex-direction: column;
