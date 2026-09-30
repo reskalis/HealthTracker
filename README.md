@@ -74,9 +74,9 @@ v0.9.1 includes a hidden, device-local voice experiment for private testing. It 
 
 The current prototype includes local microphone capture, local Whisper transcription through a vendored WASM runtime, a deterministic transcript parser for Sleep, Weight/Waist, Blood pressure/Pulse, and Workout phrases, review of detected records, and saving only after required fields are present. Audio and transcription are processed on-device and are not uploaded by HealthTracker.
 
-The browser runtime is vendored in `vendor/whisper-wasm/` and pinned to version 0.1.0. The English `base.en-q5_1` model (~57 MB) is downloaded from the upstream whisper.cpp model host only after the private tester explicitly requests it, then cached in a separate IndexedDB database named `WhisperModels`. Health records remain in HealthTracker's existing IndexedDB database.
+The active browser runtime is now built directly from the official `ggml-org/whisper.cpp` `whisper.wasm` example and vendored in `vendor/whisper-upstream/`, pinned to upstream commit `6e4ab854f67f743900934a703d5603419384c961`. This is the same upstream browser path that was verified directly on iPhone Safari before integration. The English full `tiny.en` model (~77 MB) is downloaded from the upstream whisper.cpp model host only after the private tester explicitly requests it, then cached locally in IndexedDB database `HealthTrackerWhisperUpstream`. Health records remain in HealthTracker's existing IndexedDB database.
 
-Build `2026-09-30.19` temporarily forces Whisper inference to one thread. This is a compatibility diagnostic after iPhone Safari produced healthy decoded audio but the multithreaded WASM worker failed immediately. Adaptive threading can be restored after the browser path is confirmed.
+The earlier third-party wrapper and single-thread diagnostic files remain in the repository temporarily for rollback/reference, but the voice UI no longer imports that path. The active upstream runtime uses pthreads and up to four CPU threads, matching the successful iPhone proof-of-concept.
 
 ## PWA update strategy
 
