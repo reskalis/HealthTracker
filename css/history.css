@@ -64,6 +64,7 @@
 }
 
 .filter-control select {
+  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--panel-2);
@@ -179,6 +180,7 @@
 }
 
 .history-entry-actions button {
+  min-height: 44px;
   border: 0;
   background: transparent;
   color: var(--muted);
@@ -199,6 +201,7 @@
 
 .show-older {
   width: 100%;
+  min-height: 44px;
   margin-top: 12px;
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -207,4 +210,13 @@
   padding: 10px;
   font-size: 12px;
   font-weight: 700;
+}
+
+
+.history-panel-empty .history-summary {
+  cursor: default;
+}
+
+.history-panel-empty .history-chevron {
+  display: none;
 }
