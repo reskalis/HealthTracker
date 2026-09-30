@@ -3,10 +3,13 @@ export const VOICE_MODEL_SIZE_MB = 57;
 export const VOICE_MODEL_NAME = "Whisper base.en Q5_1";
 
 let runtimePromise = null;
-let service = null;
 let manager = null;
 let modelReady = false;
 let preparing = null;
+let worker = null;
+let workerReady = null;
+let nextRequestId = 1;
+const pendingWorkerRequests = new Map();
 
 async function runtime() {
   if (!runtimePromise) {
@@ -16,12 +19,86 @@ async function runtime() {
 }
 
 async function objects() {
-  if (service && manager) return { service, manager };
+  if (manager) return { manager };
 
-  const { WhisperWasmService, ModelManager } = await runtime();
-  service = new WhisperWasmService({ logLevel: 2 });
+  const { ModelManager } = await runtime();
   manager = new ModelManager({ logLevel: 3 });
-  return { service, manager };
+  return { manager };
+}
+
+function ensureWorker() {
+  if (worker) return worker;
+
+  worker = new Worker(
+    new URL("./whisper-worker.js", import.meta.url),
+    { type: "module" }
+  );
+
+  worker.addEventListener("message", event => {
+    const message = event.data ?? {};
+    const pending = pendingWorkerRequests.get(message.id);
+    if (!pending) return;
+
+    if (message.type === "segment") {
+      pending.onSegment?.(message.segment);
+      return;
+    }
+
+    if (message.type === "ready" || message.type === "result") {
+      pendingWorkerRequests.delete(message.id);
+      pending.resolve(message);
+      return;
+    }
+
+    if (message.type === "error") {
+      pendingWorkerRequests.delete(message.id);
+      pending.reject(new Error(message.error || "Whisper worker failed."));
+    }
+  });
+
+  worker.addEventListener("error", event => {
+    const error = new Error(
+      event?.message || "Whisper worker crashed."
+    );
+    for (const pending of pendingWorkerRequests.values()) {
+      pending.reject(error);
+    }
+    pendingWorkerRequests.clear();
+    worker?.terminate();
+    worker = null;
+    workerReady = null;
+  });
+
+  return worker;
+}
+
+function workerRequest(type, payload = {}, { onSegment } = {}) {
+  const target = ensureWorker();
+  const id = nextRequestId++;
+
+  return new Promise((resolve, reject) => {
+    pendingWorkerRequests.set(id, { resolve, reject, onSegment });
+
+    if (payload.audioBuffer) {
+      target.postMessage(
+        { id, type, ...payload },
+        [payload.audioBuffer]
+      );
+    } else {
+      target.postMessage({ id, type, ...payload });
+    }
+  });
+}
+
+async function ensureWorkerReady() {
+  if (!workerReady) {
+    workerReady = workerRequest("init")
+      .catch(error => {
+        workerReady = null;
+        throw error;
+      });
+  }
+  await workerReady;
 }
 
 export async function voiceModelStatus() {
@@ -36,17 +113,7 @@ export async function voiceModelStatus() {
   };
 }
 
-function requireIsolatedRuntime() {
-  if (globalThis.crossOriginIsolated) return;
-
-  throw new Error(
-    "Local Whisper needs the updated app security context. Reload HealthTracker once, then try Talk again."
-  );
-}
-
 export async function prepareVoiceModel(onProgress = () => {}) {
-  requireIsolatedRuntime();
-
   if (modelReady) {
     onProgress(100, "Voice model ready.");
     return;
@@ -54,7 +121,7 @@ export async function prepareVoiceModel(onProgress = () => {}) {
   if (preparing) return preparing;
 
   preparing = (async () => {
-    const { service, manager } = await objects();
+    const { manager } = await objects();
 
     try {
       await navigator.storage?.persist?.();
@@ -70,7 +137,12 @@ export async function prepareVoiceModel(onProgress = () => {}) {
         : `Downloading local voice model… ${progress}%`);
     });
 
-    await service.initModel(model);
+    // The model is cached here on the page, but initialized inside a dedicated
+    // Worker so inference cannot freeze HealthTracker's UI.
+    model = null;
+    onProgress(100, "Starting local Whisper…");
+    await ensureWorkerReady();
+
     modelReady = true;
     onProgress(100, "Voice model ready.");
   })();
@@ -110,7 +182,6 @@ export async function transcribeVoiceAudio(blob, {
 } = {}) {
   await prepareVoiceModel(onProgress);
 
-  const { service } = await objects();
   const { convertFromArrayBuffer } = await runtime();
 
   const diagnostics = {
@@ -146,34 +217,33 @@ export async function transcribeVoiceAudio(blob, {
   diagnostics.threadMode = "forced-single-thread";
 
   const runtimeWarnings = [];
-  const originalWarn = console.warn;
-  console.warn = (...args) => {
-    runtimeWarnings.push(args.map(value => {
-      try {
-        return typeof value === "string" ? value : JSON.stringify(value);
-      } catch {
-        return String(value);
-      }
-    }).join(" "));
-    originalWarn.apply(console, args);
-  };
-
-  let result;
-  try {
-    onProgress(100, "Transcribing locally…");
-    result = await service.transcribe(audioData, undefined, {
-      language: "en",
-      threads,
-      translate: false
-    });
-  } finally {
-    console.warn = originalWarn;
-  }
-
   diagnostics.runtimeWarnings = runtimeWarnings;
-  diagnostics.segmentCount = result?.segments?.length ?? 0;
-  diagnostics.transcribeDurationMs = result?.transcribeDurationMs ?? null;
-  diagnostics.segments = (result?.segments ?? []).map(segment => ({
+
+  onProgress(100, "Transcribing locally…");
+
+  // Hand the already-converted Float32 audio buffer to a dedicated worker.
+  // The non-pthread WASM runtime stays single-threaded internally, while the
+  // browser's UI thread remains responsive.
+  const transferable = audioData.buffer.slice(
+    audioData.byteOffset,
+    audioData.byteOffset + audioData.byteLength
+  );
+
+  const response = await workerRequest(
+    "transcribe",
+    { audioBuffer: transferable },
+    {
+      onSegment: segment => {
+        onProgress(100, "Transcribing locally…", segment);
+      }
+    }
+  );
+
+  const result = response.result ?? { segments: [] };
+
+  diagnostics.segmentCount = result.segments?.length ?? 0;
+  diagnostics.transcribeDurationMs = result.transcribeDurationMs ?? null;
+  diagnostics.segments = (result.segments ?? []).map(segment => ({
     timeStart: segment.timeStart,
     timeEnd: segment.timeEnd,
     text: segment.text
